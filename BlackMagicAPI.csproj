@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<OutputType>Library</OutputType>
+		<langVersion>preview</langVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Reference Include="References\*.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Embed all files in the Resources folder -->
+		<EmbeddedResource Include="Resources\**\*" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Resources\Items\Item_Emission.png" />
+	  <None Remove="Resources\Items\Item_Main.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="Assembly-CSharp" Publicize="true">
+			<HintPath>References\Assembly-CSharp.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="copy &quot;$(TargetDir)BlackMagicAPI.dll&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Mage Arena\Modded\BepInEx\plugins\BlackMagicAPI&quot;" />
+	</Target>
+</Project>
