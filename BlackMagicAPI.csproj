@@ -18,11 +18,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="Resources\Items\Item_Emission.png" />
-	  <None Remove="Resources\Items\Item_Main.png" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<Reference Include="Assembly-CSharp" Publicize="true">
 			<HintPath>References\Assembly-CSharp.dll</HintPath>
 		</Reference>

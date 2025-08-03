@@ -45,7 +45,7 @@ public abstract class SpellData
         if (Plugin == null) return null;
 
         string pluginPath = Path.GetDirectoryName(Plugin.Info.Location);
-        string spritePath = Path.Combine(pluginPath, "Sprites", $"{Name}_Main.png");
+        string spritePath = Path.Combine(pluginPath, "Sprites", $"{Name.Replace(" ", "")}_Main.png");
         if (File.Exists(spritePath))
         {
             return Utils.LoadTextureFromDisk(spritePath);
@@ -63,7 +63,7 @@ public abstract class SpellData
         if (Plugin == null) return null;
 
         string pluginPath = Path.GetDirectoryName(Plugin.Info.Location);
-        string spritePath = Path.Combine(pluginPath, "Sprites", $"{Name}_Emission.png");
+        string spritePath = Path.Combine(pluginPath, "Sprites", $"{Name.Replace(" ", "")}_Emission.png");
         if (File.Exists(spritePath))
         {
             return Utils.LoadTextureFromDisk(spritePath);

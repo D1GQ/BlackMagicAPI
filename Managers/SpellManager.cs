@@ -6,6 +6,7 @@ using BlackMagicAPI.Patches.Voice;
 using FishNet.Managing;
 using FishNet.Object;
 using System.Collections;
+using System.Reflection;
 using UnityEngine;
 
 namespace BlackMagicAPI.Managers;
@@ -128,6 +129,7 @@ public static class SpellManager
                     var newNetObj = prefab.gameObject.AddComponent<NetworkObject>();
                     newNetObj.NetworkBehaviours = [];
                     NetworkManager.Instances.First().SpawnablePrefabs.AddObject(newNetObj, true);
+                    SyncNetPrefabId(newNetObj, $"{baseUnity.Info.Metadata.GUID}|{baseUnity.Info.Metadata.Name}|{baseUnity.Info.Metadata.Version}|{spellData.Name}|{spellData.GetType().Name}");
                 }
                 prefab.StartCoroutine(WaitAdd());
 
@@ -172,10 +174,10 @@ public static class SpellManager
         */
 
         BMAPlugin.Log.LogInfo($"Successfully registered {spellData.Name} Spell from {baseUnity.Info.Metadata.GUID}");
-        ReassignIds();
+        SyncSpellIds();
     }
 
-    private static void ReassignIds()
+    private static void SyncSpellIds()
     {
         var oldMapping = Mapping.ToList();
         Mapping.Clear();
@@ -187,6 +189,22 @@ public static class SpellManager
             kvp.Value.data.Id = nextId;
             Mapping.Add(nextId, (kvp.Value.plugin, kvp.Value.page, kvp.Value.data));
             nextId++;
+        }
+    }
+
+
+    private static ushort? prefabIdStart;
+    private static readonly List<(string id, NetworkObject net)> netObjs = [];
+    private static void SyncNetPrefabId(NetworkObject netObj, string id)
+    {
+        prefabIdStart ??= netObj.PrefabId;
+        var prefabId = prefabIdStart;
+        netObjs.Add((id, netObj));
+        foreach (var item in netObjs.OrderBy(i => i.id))
+        {
+            var prop = typeof(NetworkObject).GetProperty("PrefabId", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            prop?.SetValue(item.net, prefabId);
+            prefabId++;
         }
     }
 }
