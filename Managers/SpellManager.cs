@@ -17,13 +17,9 @@ namespace BlackMagicAPI.Managers;
 /// </summary>
 public static class SpellManager
 {
-    private static int nextId = 10000;
-    private static int nextBookId = 5;
-
-    private static readonly List<Type> registered = [];
-    internal static readonly Dictionary<BaseUnityPlugin, List<SpellData>> Spells = [];
-    internal static readonly List<PageController> PagePrefabs = [];
-    internal static readonly Dictionary<int, (BaseUnityPlugin plugin, PageController page, SpellData data)> Mapping = [];
+    private static readonly List<Type> registeredTypes = [];
+    internal static readonly List<(BaseUnityPlugin plugin, SpellData data, SpellLogic logic)> SpellMapping = [];
+    internal static readonly Dictionary<SpellData, PageController> PageMapping = [];
 
     /// <summary>
     /// Registers a new spell with the spell management system.
@@ -61,7 +57,7 @@ public static class SpellManager
             }
         }
 
-        if (registered.Contains(SpellDataType))
+        if (registeredTypes.Contains(SpellDataType))
         {
             BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: {SpellDataType.Name} has already been registered!");
             return;
@@ -91,9 +87,6 @@ public static class SpellManager
         }
 
         CreateSpell(baseUnity, data, logic);
-        registered.Add(spellDataType);
-        Spells[baseUnity] = [];
-        Spells[baseUnity].Add(data);
     }
 
     private static SpellLogic CreateSpellLogic(SpellData spellData, Type spellLogicType)
@@ -119,9 +112,8 @@ public static class SpellManager
                 prefab.hideFlags = HideFlags.HideAndDontSave;
                 UnityEngine.Object.DontDestroyOnLoad(prefab);
                 prefab.name = $"Page{spellData.Name}";
-
                 UnityEngine.Object.DestroyImmediate(prefab.GetComponent<NetworkObject>());
-                IEnumerator WaitAdd()
+                IEnumerator CoWaitForNetwork()
                 {
                     while (NetworkManager.Instances.Count == 0)
                         yield return null;
@@ -129,73 +121,36 @@ public static class SpellManager
                     var newNetObj = prefab.gameObject.AddComponent<NetworkObject>();
                     newNetObj.NetworkBehaviours = [];
                     NetworkManager.Instances.First().SpawnablePrefabs.AddObject(newNetObj, true);
-                    SyncNetPrefabId(newNetObj, $"{baseUnity.Info.Metadata.GUID}|{baseUnity.Info.Metadata.Name}|{baseUnity.Info.Metadata.Version}|{spellData.Name}|{spellData.GetType().Name}");
+                    SynchronizeNetworkObjectPrefab(newNetObj, $"{baseUnity.Info.Metadata.GUID}|{baseUnity.Info.Metadata.Name}|{baseUnity.Info.Metadata.Version}|{spellData.Name}|{spellData.GetType().Name}");
                 }
-                prefab.StartCoroutine(WaitAdd());
-
-                PagePrefabs.Add(prefab);
+                prefab.StartCoroutine(CoWaitForNetwork());
                 spellData.SetUpPage(prefab.GetComponent<PageController>(), spellLogic);
                 spellData.SetLight(prefab.GetComponentInChildren<Light>(true));
-
-                Mapping[nextId] = (baseUnity, prefab, spellData);
-                spellData.Id = nextId;
-                var pageComp = prefab.GetComponent<PageController>();
-                pageComp.ItemID = nextId;
-                PlayerInventoryPatch.AddUiSprite(spellData.GetUiSprite(), nextId);
-                nextId++;
+                SynchronizeSpellData(baseUnity, spellData, spellLogic, prefab);
             }
         }
-        /*
-        else if (spellData.SpellType == SpellType.Book)
-        {
-            var mageBookController = Resources.FindObjectsOfTypeAll<MageBookController>().First();
-            if (mageBookController != null)
-            {
-                var page4 = mageBookController.transform.Find("holder/magebookp4");
-                if (page4 != null)
-                {
-                    var page = UnityEngine.Object.Instantiate(page4, mageBookController.transform.Find("holder"));
-                    page.name = $"magebookp{nextBookId}";
-                    var mat = page.GetComponentInChildren<SkinnedMeshRenderer>()?.material;
-                    if (mat != null)
-                    {
-                        spellData.SetMaterial(mat);
-                    }
-                    spellData.SetLight(page.GetComponentInChildren<Light>());
-                    var CustomSpellPage = page.AddComponent<CustomSpellPage>();
-                    CustomSpellPage.pageId = nextBookId;
-                    CustomSpellPage.spellLogicPrefab = spellLogic;
-                }
-
-                spellData.Id = nextBookId;
-                nextBookId++;
-            }
-        }
-        */
 
         BMAPlugin.Log.LogInfo($"Successfully registered {spellData.Name} Spell from {baseUnity.Info.Metadata.GUID}");
-        SyncSpellIds();
     }
 
-    private static void SyncSpellIds()
+    private static void SynchronizeSpellData(BaseUnityPlugin baseUnity, SpellData spellData, SpellLogic spellLogic, PageController page)
     {
-        var oldMapping = Mapping.ToList();
-        Mapping.Clear();
-        nextId = 10000;
-
-        foreach (var kvp in oldMapping.OrderBy(k => k.Value.plugin.Info.Metadata.GUID).ThenBy(k => k.Value.data.Name))
+        PageMapping[spellData] = page;
+        SpellMapping.Add((baseUnity, spellData, spellLogic));
+        registeredTypes.Add(spellData.GetType());
+        var nextId = Resources.FindObjectsOfTypeAll<PlayerInventory>().First().ItemIcons.Length + 1;
+        foreach (var value in SpellMapping.OrderBy(k => k.plugin.Info.Metadata.GUID).ThenBy(k => k.plugin.Info.Metadata.Name).ThenBy(k => k.plugin.Info.Metadata.Version).ThenBy(k => k.data.Name))
         {
-            kvp.Value.page.ItemID = nextId;
-            kvp.Value.data.Id = nextId;
-            Mapping.Add(nextId, (kvp.Value.plugin, kvp.Value.page, kvp.Value.data));
+            PlayerInventoryPatch.SetUiSprite(spellData.GetUiSprite(), nextId);
+            value.data.Id = nextId;
+            PageMapping[value.data].ItemID = nextId;
             nextId++;
         }
     }
 
-
     private static ushort? prefabIdStart;
     private static readonly List<(string id, NetworkObject net)> netObjs = [];
-    private static void SyncNetPrefabId(NetworkObject netObj, string id)
+    private static void SynchronizeNetworkObjectPrefab(NetworkObject netObj, string id)
     {
         prefabIdStart ??= netObj.PrefabId;
         var prefabId = prefabIdStart;

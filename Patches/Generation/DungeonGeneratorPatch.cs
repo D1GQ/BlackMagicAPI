@@ -14,7 +14,7 @@ internal class DungeonGeneratorPatch
         if (lt != null)
         {
             var list = lt.Pages.ToList();
-            foreach (var page in SpellManager.PagePrefabs)
+            foreach (var page in SpellManager.PageMapping.Values)
             {
                 list.Add(page.gameObject);
             }

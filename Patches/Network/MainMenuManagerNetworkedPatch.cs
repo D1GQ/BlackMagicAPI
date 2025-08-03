@@ -12,14 +12,11 @@ internal class MainMenuManagerNetworkedPatch
     [HarmonyPrefix]
     private static void Start_Prefix(MainMenuManagerNetworked __instance)
     {
-        foreach (var list in SpellManager.Spells.Values)
+        foreach (var spellData in SpellManager.SpellMapping.Select(value => value.data))
         {
-            foreach (var spellData in list)
-            {
-                var sc = __instance.AddComponent<CustomSpellCommand>();
-                sc.enabled = true;
-                sc.SpellData = spellData;
-            }
+            var sc = __instance.AddComponent<CustomSpellCommand>();
+            sc.enabled = true;
+            sc.SpellData = spellData;
         }
     }
 }

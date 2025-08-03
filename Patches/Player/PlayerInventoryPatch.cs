@@ -18,14 +18,14 @@ internal class PlayerInventoryPatch
             if (UiSprites.TryGetValue(itemid, out var sprite))
             {
                 __instance.UIImages[slotid].transform.GetChild(0).GetComponent<Image>().sprite = sprite;
+                return false;
             }
-            return false;
         }
 
         return true;
     }
 
-    internal static void AddUiSprite(Sprite? sprite, int itemId)
+    internal static void SetUiSprite(Sprite? sprite, int itemId)
     {
         if (sprite == null) return;
         UiSprites[itemId] = sprite;
