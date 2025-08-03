@@ -34,7 +34,23 @@ public abstract class SpellData
     public int Id { get; internal set; }
     internal BaseUnityPlugin? Plugin { get; set; }
 
-    internal Sprite? GetUiSprite() => Assembly.GetExecutingAssembly().LoadSpriteFromResources("BlackMagicAPI.Resources.Items.Item_Ui.png");
+    /// <summary>
+    /// Gets the main texture for the spell's ui icon.
+    /// </summary>
+    /// <returns>The ui texture, or a default if not found.</returns>
+    internal Sprite? GetUiSprite()
+    {
+        if (Plugin == null) return null;
+
+        string pluginPath = Path.GetDirectoryName(Plugin.Info.Location);
+        string spritePath = Path.Combine(pluginPath, "Sprites", $"{Name.Replace(" ", "")}_Ui.png");
+        if (File.Exists(spritePath))
+        {
+            return Utils.LoadSpriteFromDisk(spritePath);
+        }
+
+        return Assembly.GetExecutingAssembly().LoadSpriteFromResources("BlackMagicAPI.Resources.Items.Item_Ui.png");
+    }
 
     /// <summary>
     /// Gets the main texture for the spell's visual appearance.

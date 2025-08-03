@@ -25,7 +25,7 @@ internal class CustomSpellPage : NetworkBehaviour
     internal void Cast(GameObject ownerobj, Vector3 viewDirectionVector, int level, Vector3 spawnpos)
     {
         var spellLogic = Instantiate(spellLogicPrefab, spawnpos, Quaternion.identity);
-        spellLogic?.PlayerSetup(ownerobj, viewDirectionVector, level);
+        spellLogic?.CastSpell(ownerobj, spawnpos, viewDirectionVector, level);
     }
 
     private void Update()
