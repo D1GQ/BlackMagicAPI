@@ -3,6 +3,7 @@ using BetterVoiceDetection;
 using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Modules.Items;
 using BlackMagicAPI.Modules.Spells;
+using BlackMagicAPI.Patches.Items;
 using UnityEngine;
 
 namespace BlackMagicAPI.Managers;
@@ -16,6 +17,71 @@ public static class ItemManager
     private static readonly List<Type> registeredTypes = [];
     internal static readonly List<(ItemData data, ItemBehavior behavior)> Mapping = [];
 
+    public static void RegisterCraftingRecipe(BaseUnityPlugin baseUnity, Type IItemInteraction_FirstType, Type IItemInteraction_SecondType, Type IItemInteraction_ResultType)
+    {
+        if (IItemInteraction_FirstType.IsInterface)
+        {
+            BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_FirstType can not be directly IItemInteraction interface!");
+            return;
+        }
+
+        if (IItemInteraction_SecondType.IsInterface)
+        {
+            BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_SecondType can not be directly IItemInteraction interface!");
+            return;
+        }
+
+        if (IItemInteraction_ResultType.IsInterface)
+        {
+            BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_ResultType can not be directly IItemInteraction interface!");
+            return;
+        }
+
+        if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_FirstType))
+        {
+            BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_FirstType must be inherited from IItemInteraction interface!");
+            return;
+        }
+
+        if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_SecondType))
+        {
+            BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_SecondType must be inherited from IItemInteraction interface!");
+            return;
+        }
+
+        if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_ResultType))
+        {
+            BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_ResultType must be inherited from IItemInteraction interface!");
+            return;
+        }
+
+        MonoBehaviour? firstItemPrefab = Resources.FindObjectsOfTypeAll(IItemInteraction_FirstType)?.First() as MonoBehaviour;
+        if (firstItemPrefab != null)
+        {
+            MonoBehaviour? secondItemPrefab = Resources.FindObjectsOfTypeAll(IItemInteraction_SecondType)?.First() as MonoBehaviour;
+            if (secondItemPrefab != null)
+            {
+                MonoBehaviour? resultItemPrefab = Resources.FindObjectsOfTypeAll(IItemInteraction_ResultType)?.First() as MonoBehaviour;
+                if (resultItemPrefab != null)
+                {
+                    CraftingForgePatch.RegisterRecipe(baseUnity, firstItemPrefab.gameObject, secondItemPrefab.gameObject, resultItemPrefab.gameObject);
+                }
+                else
+                {
+                    BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: Unable to find item prefab for {IItemInteraction_ResultType.Name}!");
+                }
+            }
+            else
+            {
+                BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: Unable to find item prefab for {IItemInteraction_SecondType.Name}!");
+            }
+        }
+        else
+        {
+            BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: Unable to find item prefab for {IItemInteraction_FirstType.Name}!");
+        }
+    }
+
     /// <summary>
     /// Registers a new item with the item management system.
     /// </summary>
@@ -27,13 +93,13 @@ public static class ItemManager
     {
         if (ItemDataType.IsAbstract)
         {
-            BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: ItemDataType can not be abstract!");
+            BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: ItemDataType can not be abstract!");
             return;
         }
 
         if (!ItemDataType.IsSubclassOf(typeof(ItemData)))
         {
-            BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: ItemDataType must be inherited from SpellData!");
+            BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: ItemDataType must be inherited from SpellData!");
             return;
         }
 
@@ -41,13 +107,13 @@ public static class ItemManager
         {
             if (ItemBehaviorType.IsAbstract)
             {
-                BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: ItemBehaviorType can not be abstract!");
+                BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: ItemBehaviorType can not be abstract!");
                 return;
             }
 
             if (!ItemBehaviorType.IsSubclassOf(typeof(ItemBehavior)))
             {
-                BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: ItemBehaviorType must be inherited from SpellLogic!");
+                BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: ItemBehaviorType must be inherited from SpellLogic!");
                 return;
             }
         }
@@ -74,7 +140,7 @@ public static class ItemManager
         {
             if (itemBehaviorType == null)
             {
-                BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: spellLogicType cannot be null without a loadable prefab!");
+                BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: spellLogicType cannot be null without a loadable prefab!");
                 return;
             }
 
