@@ -12,7 +12,7 @@ internal class MainMenuManagerNetworkedPatch
     [HarmonyPrefix]
     private static void Start_Prefix(MainMenuManagerNetworked __instance)
     {
-        foreach (var spellData in SpellManager.SpellMapping.Select(value => value.data))
+        foreach (var spellData in SpellManager.Mapping.Select(value => value.data))
         {
             var sc = __instance.AddComponent<CustomSpellCommand>();
             sc.enabled = true;

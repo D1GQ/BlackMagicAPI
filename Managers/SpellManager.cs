@@ -1,12 +1,8 @@
 ﻿using BepInEx;
 using BetterVoiceDetection;
 using BlackMagicAPI.Enums;
+using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Modules.Spells;
-using BlackMagicAPI.Patches.Voice;
-using FishNet.Managing;
-using FishNet.Object;
-using System.Collections;
-using System.Reflection;
 using UnityEngine;
 
 namespace BlackMagicAPI.Managers;
@@ -18,8 +14,7 @@ namespace BlackMagicAPI.Managers;
 public static class SpellManager
 {
     private static readonly List<Type> registeredTypes = [];
-    internal static readonly List<(BaseUnityPlugin plugin, SpellData data, SpellLogic logic)> SpellMapping = [];
-    internal static readonly Dictionary<SpellData, PageController> PageMapping = [];
+    internal static List<(SpellData data, PageController page)> Mapping = [];
 
     /// <summary>
     /// Registers a new spell with the spell management system.
@@ -112,54 +107,19 @@ public static class SpellManager
                 prefab.hideFlags = HideFlags.HideAndDontSave;
                 UnityEngine.Object.DontDestroyOnLoad(prefab);
                 prefab.name = $"Page{spellData.Name}";
-                UnityEngine.Object.DestroyImmediate(prefab.GetComponent<NetworkObject>());
-                IEnumerator CoWaitForNetwork()
-                {
-                    while (NetworkManager.Instances.Count == 0)
-                        yield return null;
-                    if (prefab == null) yield break;
-                    var newNetObj = prefab.gameObject.AddComponent<NetworkObject>();
-                    newNetObj.NetworkBehaviours = [];
-                    NetworkManager.Instances.First().SpawnablePrefabs.AddObject(newNetObj, true);
-                    SynchronizeNetworkObjectPrefab(newNetObj, $"{baseUnity.Info.Metadata.GUID}|{baseUnity.Info.Metadata.Name}|{baseUnity.Info.Metadata.Version}|{spellData.Name}|{spellData.GetType().Name}");
-                }
-                prefab.StartCoroutine(CoWaitForNetwork());
+                NetworkObjectManager.SynchronizeNetworkObjectPrefab(prefab, $"{baseUnity.GetUniqueHash()}|{spellData.Name}|{spellData.GetType().Name}");
                 spellData.SetUpPage(prefab.GetComponent<PageController>(), spellLogic);
                 spellData.SetLight(prefab.GetComponentInChildren<Light>(true));
-                SynchronizeSpellData(baseUnity, spellData, spellLogic, prefab);
+                NetworkObjectManager.SynchronizeItemId(baseUnity, spellData.Name, spellData.GetUiSprite, (id) =>
+                {
+                    spellData.Id = id;
+                    prefab.ItemID = id;
+                });
+                Mapping.Add((spellData, prefab));
+                registeredTypes.Add(spellData.GetType());
             }
         }
 
         BMAPlugin.Log.LogInfo($"Successfully registered {spellData.Name} Spell from {baseUnity.Info.Metadata.GUID}");
-    }
-
-    private static void SynchronizeSpellData(BaseUnityPlugin baseUnity, SpellData spellData, SpellLogic spellLogic, PageController page)
-    {
-        PageMapping[spellData] = page;
-        SpellMapping.Add((baseUnity, spellData, spellLogic));
-        registeredTypes.Add(spellData.GetType());
-        var nextId = Resources.FindObjectsOfTypeAll<PlayerInventory>().First().ItemIcons.Length + 1;
-        foreach (var value in SpellMapping.OrderBy(k => k.plugin.Info.Metadata.GUID).ThenBy(k => k.plugin.Info.Metadata.Name).ThenBy(k => k.plugin.Info.Metadata.Version).ThenBy(k => k.data.Name))
-        {
-            PlayerInventoryPatch.SetUiSprite(spellData.GetUiSprite(), nextId);
-            value.data.Id = nextId;
-            PageMapping[value.data].ItemID = nextId;
-            nextId++;
-        }
-    }
-
-    private static ushort? prefabIdStart;
-    private static readonly List<(string id, NetworkObject net)> netObjs = [];
-    private static void SynchronizeNetworkObjectPrefab(NetworkObject netObj, string id)
-    {
-        prefabIdStart ??= netObj.PrefabId;
-        var prefabId = prefabIdStart;
-        netObjs.Add((id, netObj));
-        foreach (var item in netObjs.OrderBy(i => i.id))
-        {
-            var prop = typeof(NetworkObject).GetProperty("PrefabId", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            prop?.SetValue(item.net, prefabId);
-            prefabId++;
-        }
     }
 }

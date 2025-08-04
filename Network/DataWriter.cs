@@ -3,16 +3,29 @@ using FishNet.Serializing;
 
 namespace BlackMagicAPI.Network;
 
+/// <summary>
+/// A disposable buffer for serializing and deserializing game data.
+/// </summary>
 public class DataWriter : IDisposable
 {
     private readonly List<(Type type, object value)> _dataBuffer = [];
 
+    /// <summary>
+    /// Writes a strongly-typed value to the buffer.
+    /// </summary>
+    /// <typeparam name="T">The type of the value.</typeparam>
+    /// <param name="value">The value to write (ignored if null).</param>
     public void Write<T>(T value)
     {
         if (value == null) return;
         _dataBuffer.Add((typeof(T), value));
     }
 
+    /// <summary>
+    /// Writes an object to the buffer using its runtime type.
+    /// </summary>
+    /// <param name="value">The value to write (throws if null).</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
     public void Write(object value)
     {
         if (value == null)

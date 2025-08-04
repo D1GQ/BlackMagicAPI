@@ -24,6 +24,20 @@ public abstract class SpellLogic : MonoBehaviour
     /// <param name="prefab">The GameObject of the created spell prefab.</param>
     public virtual void OnPrefabCreatedAutomatically(GameObject prefab) { }
 
+    /// <summary>
+    /// Castor writes data to a <see cref="DataWriter"/> for serialization to send to clients.
+    /// </summary>
+    /// <param name="dataWriter">The writer used to serialize data.</param>
+    /// <param name="page">The page controller associated with the data.</param>
+    /// <param name="playerObj">The player GameObject to serialize.</param>
+    /// <param name="spawnPos">The spawn position of the player.</param>
+    /// <param name="viewDirectionVector">The view direction of the player.</param>
+    /// <param name="level">The current level or stage.</param>
     public virtual void WriteData(DataWriter dataWriter, PageController page, GameObject playerObj, Vector3 spawnPos, Vector3 viewDirectionVector, int level) { }
+
+    /// <summary>
+    /// Clients including Castor Synchronizes of values from WriteData received from Castor.
+    /// </summary>
+    /// <param name="values">An array of objects containing the data to sync from WriteData.</param>
     public virtual void SyncData(object[] values) { }
 }

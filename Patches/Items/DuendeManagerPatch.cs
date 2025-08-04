@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BlackMagicAPI.Managers;
+using HarmonyLib;
 using System.Reflection;
 
 namespace BlackMagicAPI.Patches.Items;
@@ -6,6 +7,19 @@ namespace BlackMagicAPI.Patches.Items;
 [HarmonyPatch(typeof(DuendeManager))]
 internal class DuendeManagerPatch
 {
+    [HarmonyPatch(nameof(DuendeManager.Awake))]
+    [HarmonyPrefix]
+    private static void Awake_Prefix(DuendeManager __instance)
+    {
+        var list = __instance.DuendeTradeItems.ToList();
+        foreach (var map in ItemManager.Mapping.OrderBy(m => m.data.Id))
+        {
+            if (!map.data.CanGetFromTrade) continue;
+            list.Add(map.behavior.gameObject);
+        }
+        __instance.DuendeTradeItems = [.. list];
+    }
+
     [HarmonyPatch(nameof(DuendeManager.ServerCreatePage))]
     [HarmonyPrefix]
     private static void ServerCreatePage_Prefix(DuendeManager __instance, ref int rand)

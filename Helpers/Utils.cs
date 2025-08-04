@@ -1,9 +1,12 @@
-﻿using BetterVoiceDetection;
+﻿using BepInEx;
+using BetterVoiceDetection;
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Serializing;
 using FishNet.Transporting;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEngine;
 
 namespace BlackMagicAPI.Helpers;
@@ -77,6 +80,13 @@ public static class Utils
         { typeof(Channel), (writer, value) => writer.WriteChannel((Channel)value) },
     };
 
+    /// <summary>
+    /// Reads a value of the specified type from the reader using optimized type-specific methods.
+    /// </summary>
+    /// <param name="reader">The PooledReader to read from.</param>
+    /// <param name="type">The type of the value to read.</param>
+    /// <returns>The deserialized value.</returns>
+    /// <exception cref="NotSupportedException">Thrown if the type is not supported for fast reading.</exception>
     public static object ReadFast(this PooledReader reader, Type type)
     {
         if (_readers.TryGetValue(type, out var readerFunc))
@@ -86,6 +96,13 @@ public static class Utils
         throw new NotSupportedException($"Type {type.Name} is not supported for fast reading");
     }
 
+    /// <summary>
+    /// Writes a value of the specified type to the writer using optimized type-specific methods.
+    /// </summary>
+    /// <param name="writer">The PooledWriter to write to.</param>
+    /// <param name="type">The type of the value to write.</param>
+    /// <param name="value">The value to serialize.</param>
+    /// <exception cref="NotSupportedException">Thrown if the type is not supported for fast writing.</exception>
     public static void WriteFast(this PooledWriter writer, Type type, object value)
     {
         if (_writers.TryGetValue(type, out var writerAction))
@@ -220,6 +237,130 @@ public static class Utils
         {
             BMAPlugin.Log.LogError(ex);
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Loads an audio clip from a WAV file on disk.
+    /// </summary>
+    /// <param name="filePath">Full path to the WAV file to load.</param>
+    /// <returns>
+    /// The loaded AudioClip if successful, or null if:
+    /// - The file doesn't exist
+    /// - The file isn't a .wav file
+    /// - An error occurs during loading
+    /// </returns>
+    /// <remarks>
+    /// <para>This method performs the following checks:</para>
+    /// <list type="number">
+    /// <item><description>Verifies the file exists at the specified path</description></item>
+    /// <item><description>Validates the file has a .wav extension</description></item>
+    /// <item><description>Attempts to load and convert the WAV data to a Unity AudioClip</description></item>
+    /// </list>
+    /// <para>Errors are logged to the Unity console with detailed messages.</para>
+    /// <example>
+    /// Basic usage:
+    /// <code>
+    /// var clip = Utils.LoadWavFromDisk(@"C:\Sounds\effect.wav");
+    /// if (clip != null) audioSource.PlayOneShot(clip);
+    /// </code>
+    /// </example>
+    /// </remarks>
+    public static AudioClip? LoadWavFromDisk(string filePath)
+    {
+        if (!File.Exists(filePath))
+        {
+            Debug.LogError($"File not found: {filePath}");
+            return null;
+        }
+
+        if (Path.GetExtension(filePath).ToLower() != ".wav")
+        {
+            Debug.LogError("Only .wav files are supported.");
+            return null;
+        }
+
+        try
+        {
+            byte[] wavBytes = File.ReadAllBytes(filePath);
+            return WavUtility.ToAudioClip(wavBytes);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to load WAV: {ex}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Loads an audio clip from an embedded WAV resource in an assembly.
+    /// </summary>
+    /// <param name="assembly">The assembly containing the embedded resource.</param>
+    /// <param name="resourcePath">
+    /// The resource path using dot notation (e.g., "MyNamespace.Resources.sound.wav").
+    /// Resource names are case-sensitive.
+    /// </param>
+    /// <returns>
+    /// The loaded AudioClip if successful, or null if:
+    /// - The resource isn't found
+    /// - An error occurs during loading
+    /// </returns>
+    /// <remarks>
+    /// <para>This extension method performs the following operations:</para>
+    /// <list type="number">
+    /// <item><description>Locates the embedded resource in the assembly</description></item>
+    /// <item><description>Copies the resource data to a memory stream</description></item>
+    /// <item><description>Converts the WAV data to a Unity AudioClip</description></item>
+    /// </list>
+    /// <para>Important notes about embedded resources:</para>
+    /// <list type="bullet">
+    /// <item><description>The resource must be marked as "Embedded Resource" in the project</description></item>
+    /// <item><description>The resource path uses dot notation and doesn't include the assembly name</description></item>
+    /// <item><description>Resource paths are case-sensitive</description></item>
+    /// </list>
+    /// <example>
+    /// Basic usage:
+    /// <code>
+    /// var clip = Assembly.GetExecutingAssembly().LoadWavFromResources("MyMod.Sounds.effect.wav");
+    /// if (clip != null) audioSource.PlayOneShot(clip);
+    /// </code>
+    /// </example>
+    /// </remarks>
+    public static AudioClip? LoadWavFromResources(this Assembly assembly, string resourcePath)
+    {
+        try
+        {
+            using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
+            {
+                if (stream == null)
+                {
+                    Debug.LogError($"Resource not found: {resourcePath}");
+                    return null;
+                }
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    stream.CopyTo(ms);
+                    byte[] wavBytes = ms.ToArray();
+                    return WavUtility.ToAudioClip(wavBytes);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to load WAV from resources: {ex}");
+            return null;
+        }
+    }
+
+    internal static string GetUniqueHash(this BaseUnityPlugin baseUnity)
+    {
+        string metadataString = $"{baseUnity.Info.Metadata.GUID}|{baseUnity.Info.Metadata.Name}|{baseUnity.Info.Metadata.Version}";
+
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(metadataString));
+            return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
         }
     }
 }

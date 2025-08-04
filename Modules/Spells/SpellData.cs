@@ -8,36 +8,95 @@ namespace BlackMagicAPI.Modules.Spells;
 
 /// <summary>
 /// Abstract base class representing spell data and configuration.
-/// Provides core functionality for spell textures, cooldowns, and visual effects.
+/// Provides core functionality for spell properties, visual effects, and resource management.
 /// </summary>
+/// <remarks>
+/// Derived classes must implement key spell properties and can override resource loading methods
+/// to provide custom assets. The class handles automatic setup of spell materials and lighting.
+/// </remarks>
 public abstract class SpellData
 {
     /// <summary>
-    /// Gets the type of spell (defaults to Page type).
+    /// Gets the classification type of the spell.
     /// </summary>
+    /// <value>
+    /// Defaults to <see cref="SpellType.Page"/>. Override to specify different spell types.
+    /// </value>
     public virtual SpellType SpellType => SpellType.Page;
+
     /// <summary>
-    /// Gets the name of the spell (must be implemented by derived classes).
+    /// Gets whether the spell should be forcibly spawned in team chests for debugging purposes.
     /// </summary>
+    /// <value>
+    /// Defaults to false. When true, ensures the spell appears in team chests regardless of normal spawn rules.
+    /// </value>
+    public virtual bool DebugForceSpawn => false;
+
+    /// <summary>
+    /// Gets whether the spell can naturally spawn in team chests during normal gameplay.
+    /// </summary>
+    /// <value>
+    /// Defaults to false. Override to true to allow natural spawning in team chests.
+    /// </value>
+    public virtual bool CanSpawnInTeamChest => false;
+
+    /// <summary>
+    /// Gets the display name of the spell.
+    /// </summary>
+    /// <remarks>
+    /// This abstract property must be implemented by derived classes to provide the spell's name.
+    /// The name is used for display purposes and for locating spell resources.
+    /// </remarks>
     public abstract string Name { get; }
+
     /// <summary>
-    /// Gets the cooldown time in seconds for the spell (must be implemented by derived classes).
+    /// Gets the cooldown duration in seconds between spell uses.
     /// </summary>
+    /// <remarks>
+    /// This abstract property must be implemented by derived classes to specify the spell's cooldown.
+    /// The cooldown is enforced by the spell system after each activation.
+    /// </remarks>
     public abstract float Cooldown { get; }
+
     /// <summary>
-    /// Gets the glow color for the spell's visual effects (must be implemented by derived classes).
+    /// Gets the primary glow color used for the spell's visual effects.
     /// </summary>
+    /// <remarks>
+    /// This abstract property must be implemented by derived classes to define the spell's signature color.
+    /// The color is used for particle effects, lighting, and emission materials.
+    /// </remarks>
     public abstract Color GlowColor { get; }
+
     /// <summary>
-    /// Gets the unique identifier for the spell.
+    /// Gets the unique numeric identifier for the spell type.
     /// </summary>
+    /// <remarks>
+    /// This value is set internally by the API and should not be modified manually.
+    /// Used for spell identification and serialization.
+    /// </remarks>
     public int Id { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the BepInEx plugin associated with this spell.
+    /// </summary>
+    /// <remarks>
+    /// Used for locating spell-specific resources in the plugin's directory.
+    /// Set internally by the API during spell registration.
+    /// </remarks>
     internal BaseUnityPlugin? Plugin { get; set; }
 
     /// <summary>
-    /// Gets the main texture for the spell's ui icon.
+    /// Loads the UI icon sprite for this spell from the plugin's resources.
     /// </summary>
-    /// <returns>The ui texture, or a default if not found.</returns>
+    /// <returns>
+    /// The custom UI sprite if found in the plugin's Sprites directory,
+    /// otherwise the default spell UI sprite from the API resources.
+    /// Returns null if no plugin is associated.
+    /// </returns>
+    /// <remarks>
+    /// Looks for a PNG file named "{SpellName}_Ui.png" in the plugin's Sprites folder.
+    /// Removes spaces from the spell name when constructing the filename.
+    /// </remarks>
     internal Sprite? GetUiSprite()
     {
         if (Plugin == null) return null;
@@ -53,9 +112,17 @@ public abstract class SpellData
     }
 
     /// <summary>
-    /// Gets the main texture for the spell's visual appearance.
+    /// Loads the main texture for the spell's visual appearance.
     /// </summary>
-    /// <returns>The main texture, or a default if not found.</returns>
+    /// <returns>
+    /// The custom main texture if found in the plugin's Sprites directory,
+    /// otherwise the default spell texture from the API resources.
+    /// Returns null if no plugin is associated.
+    /// </returns>
+    /// <remarks>
+    /// Looks for a PNG file named "{SpellName}_Main.png" in the plugin's Sprites folder.
+    /// This texture is applied to the spell's base material.
+    /// </remarks>
     public virtual Texture2D? GetMainTexture()
     {
         if (Plugin == null) return null;
@@ -71,9 +138,17 @@ public abstract class SpellData
     }
 
     /// <summary>
-    /// Gets the emission texture for the spell's glowing effects.
+    /// Loads the emission texture for the spell's glowing effects.
     /// </summary>
-    /// <returns>The emission texture, or a default if not found.</returns>
+    /// <returns>
+    /// The custom emission texture if found in the plugin's Sprites directory,
+    /// otherwise the default emission texture from the API resources.
+    /// Returns null if no plugin is associated.
+    /// </returns>
+    /// <remarks>
+    /// Looks for a PNG file named "{SpellName}_Emission.png" in the plugin's Sprites folder.
+    /// This texture is combined with the glow color for emissive effects.
+    /// </remarks>
     public virtual Texture2D? GetEmissionTexture()
     {
         if (Plugin == null) return null;
@@ -89,11 +164,26 @@ public abstract class SpellData
     }
 
     /// <summary>
-    /// Gets the spell logic prefab associated with this spell.
+    /// Gets the spell logic prefab that implements this spell's behavior.
     /// </summary>
-    /// <returns>A Task containing the SpellLogic prefab or null if not provided.</returns>
+    /// <returns>
+    /// A Task that resolves to the SpellLogic prefab, or null if no custom prefab is provided.
+    /// </returns>
+    /// <remarks>
+    /// Override this in derived classes to provide custom spell behavior prefabs.
+    /// The default implementation returns null, which will result in a non-functional spell.
+    /// </remarks>
     public virtual Task<SpellLogic?> GetLogicPrefab() => Task.FromResult<SpellLogic?>(null);
 
+    /// <summary>
+    /// Configures a page controller with this spell's properties.
+    /// </summary>
+    /// <param name="page">The PageController to configure.</param>
+    /// <param name="logic">The SpellLogic instance associated with this spell.</param>
+    /// <remarks>
+    /// This method is called internally by the API during spell initialization.
+    /// It sets up the page's ID, cooldown, and visual references.
+    /// </remarks>
     internal void SetUpPage(PageController page, SpellLogic logic)
     {
         page.ItemID = Id;
@@ -103,6 +193,14 @@ public abstract class SpellData
         SetMaterial(page.pagerender.material);
     }
 
+    /// <summary>
+    /// Applies this spell's textures to a material.
+    /// </summary>
+    /// <param name="material">The material to configure.</param>
+    /// <remarks>
+    /// Sets both the base texture and emission texture on the material.
+    /// Uses default textures if custom ones aren't provided.
+    /// </remarks>
     internal void SetMaterial(Material material)
     {
         var main = GetMainTexture();
@@ -114,6 +212,14 @@ public abstract class SpellData
             material.SetTexture("_emistexture", emi);
     }
 
+    /// <summary>
+    /// Configures a light component with this spell's glow color.
+    /// </summary>
+    /// <param name="light">The light component to configure.</param>
+    /// <remarks>
+    /// Sets the light's color to match the spell's GlowColor property.
+    /// Does nothing if the light parameter is null.
+    /// </remarks>
     internal void SetLight(Light? light)
     {
         if (light == null) return;

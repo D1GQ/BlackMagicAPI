@@ -1,5 +1,8 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
+using BlackMagicAPI.Managers;
+using BlackMagicAPI.Modules;
+using BlackMagicAPI.Modules.Items;
 using HarmonyLib;
 
 namespace BetterVoiceDetection;
@@ -12,7 +15,7 @@ public class BMAPlugin : BaseUnityPlugin
     internal static BMAPlugin Instance { get; private set; }
     private const string MyGUID = "com.d1gq.black.magic.api";
     internal const string PluginName = "BlackMagicAPI";
-    private const string VersionString = "1.4.0";
+    private const string VersionString = "1.5.0";
 
     private static Harmony? Harmony;
     internal static ManualLogSource Log => Instance._log;
@@ -26,5 +29,9 @@ public class BMAPlugin : BaseUnityPlugin
         Instance = this;
         Harmony = new(MyGUID);
         Harmony.PatchAll();
+        Log.LogInfo($"BlackMagicAPI v{VersionString} loaded!");
+
+        SpellManager.RegisterSpell(this, typeof(MySpellData), typeof(MySpellLogic));
+        ItemManager.RegisterItem(this, typeof(MyItemData), typeof(MyItemBehavior));
     }
 }
