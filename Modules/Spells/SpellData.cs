@@ -41,6 +41,14 @@ public abstract class SpellData
     public virtual bool CanSpawnInTeamChest => false;
 
     /// <summary>
+    /// Gets whether the item can naturally spawn in coloseum during normal gameplay.
+    /// </summary>
+    /// <value>
+    /// Defaults to false. Override in derived classes to allow coloseum spawning.
+    /// </value>
+    public virtual bool CanSpawnInColoseum => true;
+
+    /// <summary>
     /// Gets the display name of the spell.
     /// </summary>
     /// <remarks>

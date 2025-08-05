@@ -3,7 +3,7 @@ using BlackMagicAPI.Modules.Spells;
 using HarmonyLib;
 using Unity.VisualScripting;
 
-namespace BlackMagicAPI.Patches.Network;
+namespace BlackMagicAPI.Patches.Managers;
 
 [HarmonyPatch(typeof(MainMenuManagerNetworked))]
 internal class MainMenuManagerNetworkedPatch

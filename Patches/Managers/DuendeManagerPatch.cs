@@ -2,7 +2,7 @@
 using HarmonyLib;
 using System.Reflection;
 
-namespace BlackMagicAPI.Patches.Items;
+namespace BlackMagicAPI.Patches.Managers;
 
 [HarmonyPatch(typeof(DuendeManager))]
 internal class DuendeManagerPatch

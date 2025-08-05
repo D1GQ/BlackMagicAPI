@@ -37,7 +37,15 @@ public abstract class ItemData
     public virtual bool CanSpawnInTeamChest => false;
 
     /// <summary>
-    /// Gets whether the item can be obtained through player trading.
+    /// Gets whether the item can naturally spawn in coloseum during normal gameplay.
+    /// </summary>
+    /// <value>
+    /// Defaults to false. Override in derived classes to allow coloseum spawning.
+    /// </value>
+    public virtual bool CanSpawnInColoseum => true;
+
+    /// <summary>
+    /// Gets whether the item can be obtained through duende trading.
     /// </summary>
     /// <value>
     /// Defaults to false. Override in derived classes to allow trading.
