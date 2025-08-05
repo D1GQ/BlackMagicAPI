@@ -1,5 +1,4 @@
 ﻿using BepInEx;
-using BetterVoiceDetection;
 using HarmonyLib;
 using System.Collections;
 using System.Reflection;

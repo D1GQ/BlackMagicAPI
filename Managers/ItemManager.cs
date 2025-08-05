@@ -1,5 +1,4 @@
 ﻿using BepInEx;
-using BetterVoiceDetection;
 using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Modules.Items;
 using BlackMagicAPI.Modules.Spells;

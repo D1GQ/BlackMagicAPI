@@ -1,5 +1,4 @@
 ﻿using BepInEx;
-using BetterVoiceDetection;
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Serializing;

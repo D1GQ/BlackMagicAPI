@@ -39,9 +39,6 @@ public abstract class ItemData
     /// <summary>
     /// Gets whether the item can naturally spawn in coloseum during normal gameplay.
     /// </summary>
-    /// <value>
-    /// Defaults to false. Override in derived classes to allow coloseum spawning.
-    /// </value>
     public virtual bool CanSpawnInColoseum => true;
 
     /// <summary>
