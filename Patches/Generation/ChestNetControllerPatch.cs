@@ -1,4 +1,5 @@
-﻿using BlackMagicAPI.Managers;
+﻿using BlackMagicAPI.Helpers;
+using BlackMagicAPI.Managers;
 using HarmonyLib;
 using System.Reflection;
 
@@ -28,18 +29,7 @@ internal class ChestNetControllerPatch
     [HarmonyPatch]
     private static class PiseverPatch
     {
-        private static MethodBase TargetMethod()
-        {
-            var methods = typeof(ChestNetController)
-                .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                .Where(m => m.Name.StartsWith("RpcLogic___pisever"))
-                .ToList();
-
-            if (methods.Count == 0)
-                throw new Exception("Could not find RpcLogic___pisever method");
-
-            return methods[0];
-        }
+        private static MethodBase TargetMethod() => Utils.PatchRpcMethod<ChestNetController>("RpcLogic___pisever");
 
         [HarmonyPrefix]
         private static void Prefix(ChestNetController __instance)

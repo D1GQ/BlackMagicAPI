@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BlackMagicAPI.Helpers;
+using HarmonyLib;
 using System.Reflection;
 
 namespace BlackMagicAPI.Patches.Items;
@@ -16,18 +17,7 @@ internal class Generator2DPatch
     [HarmonyPatch]
     private static class ServerPlaceItemPatch
     {
-        private static MethodBase TargetMethod()
-        {
-            var methods = typeof(Generator2D)
-                .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                .Where(m => m.Name.StartsWith("RpcLogic___ServerPlaceItem"))
-                .ToList();
-
-            if (methods.Count == 0)
-                throw new Exception("Could not find RpcLogic___ServerPlaceItem method");
-
-            return methods[0];
-        }
+        private static MethodBase TargetMethod() => Utils.PatchRpcMethod<Generator2D>("RpcLogic___ServerPlaceItem");
 
         [HarmonyPrefix]
         private static void Prefix(Generator2D __instance, ref int itemid)

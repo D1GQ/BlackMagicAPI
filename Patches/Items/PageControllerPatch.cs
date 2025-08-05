@@ -1,4 +1,5 @@
-﻿using BlackMagicAPI.Modules.Spells;
+﻿using BlackMagicAPI.Helpers;
+using BlackMagicAPI.Modules.Spells;
 using BlackMagicAPI.Network;
 using FishNet.Connection;
 using FishNet.Managing;
@@ -51,20 +52,9 @@ internal class PageControllerPatch
     }
 
     [HarmonyPatch]
-    private static class RpcReader___Server_CastSpellServerPatch
+    private static class RpcReaderServerCastSpellServerPatch
     {
-        private static MethodBase TargetMethod()
-        {
-            var methods = typeof(PageController)
-                .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                .Where(m => m.Name.StartsWith("RpcReader___Server_CastSpellServer"))
-                .ToList();
-
-            if (methods.Count == 0)
-                throw new Exception("Could not find RpcReader___Server_CastSpellServer method");
-
-            return methods[0];
-        }
+        private static MethodBase TargetMethod() => Utils.PatchRpcMethod<PageController>("RpcReader___Server_CastSpellServer");
 
         [HarmonyPrefix]
         private static bool Prefix(PageController __instance, PooledReader PooledReader0, Channel channel, NetworkConnection conn)

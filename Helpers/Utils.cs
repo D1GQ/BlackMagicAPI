@@ -362,4 +362,17 @@ public static class Utils
             return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
         }
     }
+
+    internal static MethodBase PatchRpcMethod<T>(string rpcNamePrefix)
+    {
+        var methods = typeof(T)
+            .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+            .Where(m => m.Name.StartsWith(rpcNamePrefix))
+            .ToList();
+
+        if (methods.Count == 0)
+            throw new Exception($"Could not find method that starts with {rpcNamePrefix} in {typeof(T)}");
+
+        return methods[0];
+    }
 }

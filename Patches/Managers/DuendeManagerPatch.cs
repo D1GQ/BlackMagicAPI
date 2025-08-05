@@ -1,4 +1,5 @@
-﻿using BlackMagicAPI.Managers;
+﻿using BlackMagicAPI.Helpers;
+using BlackMagicAPI.Managers;
 using HarmonyLib;
 using System.Reflection;
 
@@ -30,18 +31,7 @@ internal class DuendeManagerPatch
     [HarmonyPatch]
     private static class ServerCreatePagePatch
     {
-        private static MethodBase TargetMethod()
-        {
-            var methods = typeof(DuendeManager)
-                .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                .Where(m => m.Name.StartsWith("RpcLogic___ServerCreatePage"))
-                .ToList();
-
-            if (methods.Count == 0)
-                throw new Exception("Could not find RpcLogic___ServerCreatePage method");
-
-            return methods[0];
-        }
+        private static MethodBase TargetMethod() => Utils.PatchRpcMethod<DuendeManager>("RpcLogic___ServerCreatePage");
 
         [HarmonyPrefix]
         private static void Prefix(DuendeManager __instance, [HarmonyArgument(1)] ref int rand)

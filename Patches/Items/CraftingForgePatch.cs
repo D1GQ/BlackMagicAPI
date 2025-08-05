@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BlackMagicAPI.Helpers;
+using HarmonyLib;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
@@ -76,18 +77,7 @@ internal class CraftingForgePatch
     [HarmonyPatch]
     private static class ServerCraftPatch
     {
-        private static MethodBase TargetMethod()
-        {
-            var methods = typeof(CraftingForge)
-                .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                .Where(m => m.Name.StartsWith("RpcLogic___ServerCraft"))
-                .ToList();
-
-            if (methods.Count == 0)
-                throw new Exception("Could not find RpcLogic___ServerCraft method");
-
-            return methods[0];
-        }
+        private static MethodBase TargetMethod() => Utils.PatchRpcMethod<CraftingForge>("RpcLogic___ServerCraft");
 
         [HarmonyPrefix]
         private static bool Prefix(CraftingForge __instance)
