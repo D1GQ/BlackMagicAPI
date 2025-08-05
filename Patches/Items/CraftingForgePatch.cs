@@ -1,5 +1,4 @@
-﻿using BepInEx;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
@@ -11,7 +10,7 @@ internal class CraftingForgePatch
 {
     internal static Dictionary<(IItemInteraction firstItem, IItemInteraction secondItem), GameObject> Recipes = [];
 
-    internal static void RegisterRecipe(BaseUnityPlugin baseUnity, GameObject firstItemPrefap, GameObject secondItemPrefap, GameObject resultPrefap)
+    internal static bool RegisterRecipe(GameObject firstItemPrefap, GameObject secondItemPrefap, GameObject resultPrefap)
     {
         var item1 = firstItemPrefap.GetComponent<IItemInteraction>();
         var item2 = secondItemPrefap.GetComponent<IItemInteraction>();
@@ -20,12 +19,10 @@ internal class CraftingForgePatch
         if (!TryGetRecipeByIDs(item1.GetItemID(), item2.GetItemID(), out _))
         {
             Recipes[(item1, item2)] = resultPrefap;
-            BMAPlugin.Log.LogInfo($"Successfully registered ({item1.GetType()}, {item2.GetType()}) => {resultItem.GetType()} recipe from {baseUnity.Info.Metadata.GUID}");
+            return true;
         }
-        else
-        {
-            BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: You cannot register a recipe that's already been registered!");
-        }
+
+        return false;
     }
 
     private static bool TryGetRecipeByIDs(int id1, int id2, out GameObject? result)

@@ -7,8 +7,10 @@ namespace BlackMagicAPI.Modules.Spells;
 /// Abstract base class for spell behavior logic.
 /// Provides the core interface for spell casting functionality and initialization.
 /// </summary>
-public abstract class SpellLogic : MonoBehaviour
+public abstract class SpellLogic : MonoBehaviour, ISpell
 {
+    public void PlayerSetup(GameObject ownerobj, Vector3 fwdVector, int level) { }
+
     /// <summary>
     /// Contains the core spell casting logic to be implemented by derived classes.
     /// </summary>

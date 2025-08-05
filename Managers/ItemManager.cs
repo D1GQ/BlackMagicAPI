@@ -17,12 +17,12 @@ public static class ItemManager
     internal static readonly List<(ItemData data, ItemBehavior behavior)> Mapping = [];
 
     /// <summary>
-    /// Registers a crafting recipe by validating and locating the required item prefabs.
+    /// Registers a crafting recipe by validating and locating the required item and spell prefabs.
     /// </summary>
     /// <param name="baseUnity">The plugin registering the recipe</param>
-    /// <param name="IItemInteraction_FirstType">Type of the first item in the recipe (must implement IItemInteraction but not be the interface itself)</param>
-    /// <param name="IItemInteraction_SecondType">Type of the second item in the recipe (must implement IItemInteraction but not be the interface itself)</param>
-    /// <param name="IItemInteraction_ResultType">Type of the resulting item (must implement IItemInteraction but not be the interface itself)</param>
+    /// <param name="IItemInteraction_FirstType">Type of the first item in the recipe (must implement IItemInteraction or SpellLogic/ISpell but not be the interface itself)</param>
+    /// <param name="IItemInteraction_SecondType">Type of the second item in the recipe (must implement IItemInteraction or SpellLogic/ISpell  but not be the interface itself)</param>
+    /// <param name="IItemInteraction_ResultType">Type of the resulting item (must implement IItemInteraction or SpellLogic/ISpell  but not be the interface itself)</param>
     public static void RegisterCraftingRecipe(BaseUnityPlugin baseUnity, Type IItemInteraction_FirstType, Type IItemInteraction_SecondType, Type IItemInteraction_ResultType)
     {
         if (IItemInteraction_FirstType.IsInterface)
@@ -43,34 +43,44 @@ public static class ItemManager
             return;
         }
 
-        if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_FirstType))
+        if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_FirstType) && !typeof(ISpell).IsAssignableFrom(IItemInteraction_FirstType))
         {
             BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_FirstType must be inherited from IItemInteraction interface!");
             return;
         }
 
-        if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_SecondType))
+        if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_SecondType) && !typeof(ISpell).IsAssignableFrom(IItemInteraction_SecondType))
         {
             BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_SecondType must be inherited from IItemInteraction interface!");
             return;
         }
 
-        if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_ResultType))
+        if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_ResultType) && !typeof(ISpell).IsAssignableFrom(IItemInteraction_SecondType))
         {
             BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_ResultType must be inherited from IItemInteraction interface!");
             return;
         }
 
-        MonoBehaviour? firstItemPrefab = Resources.FindObjectsOfTypeAll(IItemInteraction_FirstType)?.First() as MonoBehaviour;
+        MonoBehaviour? firstItemPrefab = !typeof(ISpell).IsAssignableFrom(IItemInteraction_FirstType) ? Resources.FindObjectsOfTypeAll(IItemInteraction_FirstType)?.First() as MonoBehaviour :
+            GetPageFromSpellType(IItemInteraction_FirstType);
         if (firstItemPrefab != null)
         {
-            MonoBehaviour? secondItemPrefab = Resources.FindObjectsOfTypeAll(IItemInteraction_SecondType)?.First() as MonoBehaviour;
+            MonoBehaviour? secondItemPrefab = !typeof(ISpell).IsAssignableFrom(IItemInteraction_SecondType) ? Resources.FindObjectsOfTypeAll(IItemInteraction_SecondType)?.First() as MonoBehaviour :
+                GetPageFromSpellType(IItemInteraction_FirstType);
             if (secondItemPrefab != null)
             {
-                MonoBehaviour? resultItemPrefab = Resources.FindObjectsOfTypeAll(IItemInteraction_ResultType)?.First() as MonoBehaviour;
+                MonoBehaviour? resultItemPrefab = !typeof(ISpell).IsAssignableFrom(IItemInteraction_SecondType) ? Resources.FindObjectsOfTypeAll(IItemInteraction_ResultType)?.First() as MonoBehaviour :
+                    GetPageFromSpellType(IItemInteraction_FirstType);
                 if (resultItemPrefab != null)
                 {
-                    CraftingForgePatch.RegisterRecipe(baseUnity, firstItemPrefab.gameObject, secondItemPrefab.gameObject, resultItemPrefab.gameObject);
+                    if (CraftingForgePatch.RegisterRecipe(firstItemPrefab.gameObject, secondItemPrefab.gameObject, resultItemPrefab.gameObject))
+                    {
+                        BMAPlugin.Log.LogInfo($"Successfully registered ({IItemInteraction_FirstType}, {IItemInteraction_SecondType} => {IItemInteraction_ResultType} recipe from {baseUnity.Info.Metadata.GUID}");
+                    }
+                    else
+                    {
+                        BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: You cannot register a recipe that's already been registered!");
+                    }
                 }
                 else
                 {
@@ -86,6 +96,19 @@ public static class ItemManager
         {
             BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: Unable to find item prefab for {IItemInteraction_FirstType.Name}!");
         }
+    }
+
+    private static MonoBehaviour? GetPageFromSpellType(Type spellType)
+    {
+        var pages = Resources.FindObjectsOfTypeAll<PageController>();
+        foreach (var page in pages)
+        {
+            if (page?.spellprefab?.GetComponent<ISpell>()?.GetType() == spellType)
+            {
+                return page;
+            }
+        }
+        return null;
     }
 
     /// <summary>
