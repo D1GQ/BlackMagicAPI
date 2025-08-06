@@ -198,6 +198,7 @@ internal static class ItemManager
         });
         Mapping.Add((itemData, itemBehavior));
         registeredTypes.Add(itemData.GetType());
+        BlackMagicManager.UpdateSyncHash();
 
         BMAPlugin.Log.LogInfo($"Successfully registered {itemData.Name} Item from {baseUnity.Info.Metadata.GUID}");
     }

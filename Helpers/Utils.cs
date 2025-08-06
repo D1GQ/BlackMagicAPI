@@ -352,6 +352,15 @@ public static class Utils
         }
     }
 
+    internal static string GenerateNineDigitHash(string input)
+    {
+        using SHA256 sha256 = SHA256.Create();
+        byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+        uint hashValue = BitConverter.ToUInt32(hashBytes, 0);
+        long nineDigitNumber = hashValue % 1000000000L;
+        return nineDigitNumber.ToString("000 | 000 | 000");
+    }
+
     internal static string GetUniqueHash(this BaseUnityPlugin baseUnity)
     {
         string metadataString = $"{baseUnity.Info.Metadata.GUID}|{baseUnity.Info.Metadata.Name}|{baseUnity.Info.Metadata.Version}";
@@ -374,5 +383,66 @@ public static class Utils
             throw new Exception($"Could not find method that starts with {rpcNamePrefix} in {typeof(T)}");
 
         return methods[0];
+    }
+
+    internal static GameObject? FindInactive(string path, string sceneName = null)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            Debug.LogError("[FindInactive] Path is null or empty");
+            return null;
+        }
+
+        string[] parts = path.Split('/');
+        if (parts.Length == 0)
+        {
+            Debug.LogError("[FindInactive] Path has no valid segments");
+            return null;
+        }
+
+        // Search in specific scene if provided, otherwise check all scenes
+        bool searchAllScenes = string.IsNullOrEmpty(sceneName);
+        Transform? parent = null;
+
+        for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
+        {
+            var scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
+
+            // Skip if we're looking for a specific scene and this isn't it
+            if (!searchAllScenes && !scene.name.Equals(sceneName))
+                continue;
+
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                if (root.name.Equals(parts[0]))
+                {
+                    parent = root.transform;
+                    Debug.Log($"[FindInactive] Found root '{parts[0]}' in scene '{scene.name}'");
+                    break;
+                }
+            }
+
+            if (parent != null) break; // Found our starting point
+        }
+
+        if (parent == null)
+        {
+            Debug.LogError($"[FindInactive] Root object '{parts[0]}' not found {(searchAllScenes ? "in any scene" : $"in scene '{sceneName}'")}");
+            return null;
+        }
+
+        // Traverse the remaining path
+        for (int i = 1; i < parts.Length; i++)
+        {
+            parent = parent.Find(parts[i]);
+            if (parent == null)
+            {
+                Debug.LogError($"[FindInactive] Child '{parts[i]}' not found under '{parts[i - 1]}'");
+                return null;
+            }
+        }
+
+        Debug.Log($"[FindInactive] Successfully found '{path}' {(searchAllScenes ? "" : $"in scene '{sceneName}'")}");
+        return parent.gameObject;
     }
 }

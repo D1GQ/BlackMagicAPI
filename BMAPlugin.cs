@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
+using BlackMagicAPI.Managers;
 using HarmonyLib;
 
 namespace BlackMagicAPI;
@@ -12,7 +13,7 @@ public class BMAPlugin : BaseUnityPlugin
     internal static BMAPlugin Instance { get; private set; }
     private const string MyGUID = "com.d1gq.black.magic.api";
     internal const string PluginName = "BlackMagicAPI";
-    private const string VersionString = "2.0.0";
+    private const string VersionString = "2.0.1";
 
     private static Harmony? Harmony;
     internal static ManualLogSource Log => Instance._log;
@@ -27,5 +28,6 @@ public class BMAPlugin : BaseUnityPlugin
         Harmony = new(MyGUID);
         Harmony.PatchAll();
         Log.LogInfo($"BlackMagicAPI v{VersionString} loaded!");
+        BlackMagicManager.UpdateSyncHash();
     }
 }

@@ -105,6 +105,7 @@ internal static class SpellManager
                 });
                 Mapping.Add((spellData, prefab));
                 registeredTypes.Add(spellData.GetType());
+                BlackMagicManager.UpdateSyncHash();
             }
         }
 
