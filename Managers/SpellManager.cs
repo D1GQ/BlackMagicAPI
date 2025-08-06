@@ -100,7 +100,7 @@ internal static class SpellManager
                     spellData.Id = id;
                     prefab.ItemID = id;
                 });
-                NetworkObjectManager.SynchronizeNetworkObjectPrefab(prefab, $"{baseUnity.GetUniqueHash()}|{spellData.Name}|{spellData.GetType().Name}");
+                NetworkObjectManager.SynchronizeNetworkObjectPrefab(prefab, Utils.GenerateHash($"{baseUnity.GetUniqueHash()}|{spellData.Name}|{spellData.GetType().Name}"));
                 spellData.SetUpPage(prefab.GetComponent<PageController>(), spellLogic);
                 spellData.SetLight(prefab.GetComponentInChildren<Light>(true));
                 Mapping.Add((spellData, prefab));

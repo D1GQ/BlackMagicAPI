@@ -195,7 +195,7 @@ internal static class ItemManager
             itemData.Id = id;
             itemBehavior.Id = id;
         });
-        NetworkObjectManager.SynchronizeNetworkObjectPrefab(itemBehavior, $"{baseUnity.GetUniqueHash()}|{itemData.Name}|{itemData.GetType().Name}");
+        NetworkObjectManager.SynchronizeNetworkObjectPrefab(itemBehavior, Utils.GenerateHash($"{baseUnity.GetUniqueHash()}|{itemData.GetType().FullName}"));
         Mapping.Add((itemData, itemBehavior));
         registeredTypes.Add(itemData.GetType());
         BlackMagicManager.UpdateSyncHash();

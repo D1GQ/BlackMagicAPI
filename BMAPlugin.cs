@@ -13,7 +13,7 @@ public class BMAPlugin : BaseUnityPlugin
     internal static BMAPlugin Instance { get; private set; }
     private const string MyGUID = "com.d1gq.black.magic.api";
     internal const string PluginName = "BlackMagicAPI";
-    private const string VersionString = "2.0.2";
+    private const string VersionString = "2.0.3";
 
     private static Harmony? Harmony;
     internal static ManualLogSource Log => Instance._log;

@@ -84,13 +84,6 @@ public abstract class SpellData
     /// </remarks>
     public int Id { get; internal set; }
 
-    /// <summary>
-    /// Gets or sets the BepInEx plugin associated with this spell.
-    /// </summary>
-    /// <remarks>
-    /// Used for locating spell-specific resources in the plugin's directory.
-    /// Set internally by the API during spell registration.
-    /// </remarks>
     internal BaseUnityPlugin? Plugin { get; set; }
 
     /// <summary>

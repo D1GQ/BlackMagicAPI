@@ -423,15 +423,19 @@ public static class Utils
         return nineDigitNumber.ToString("000 | 000 | 000");
     }
 
-    internal static string GetUniqueHash(this BaseUnityPlugin baseUnity)
+    internal static string GenerateHash(string input)
     {
-        string metadataString = $"{baseUnity.Info.Metadata.GUID}|{baseUnity.Info.Metadata.Name}|{baseUnity.Info.Metadata.Version}";
-
         using (SHA256 sha256 = SHA256.Create())
         {
-            byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(metadataString));
-            return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+            byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+            return BitConverter.ToString(hashBytes).Trim();
         }
+    }
+
+    internal static string GetUniqueHash(this BaseUnityPlugin baseUnity)
+    {
+        string metadataString = $"{baseUnity.Info.Metadata.GUID}|{baseUnity.Info.Metadata.Name}";
+        return GenerateHash(metadataString);
     }
 
     internal static MethodBase PatchRpcMethod<T>(string rpcNamePrefix)
