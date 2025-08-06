@@ -352,7 +352,69 @@ public static class Utils
         }
     }
 
-    internal static string GenerateNineDigitHash(string input)
+    /// <summary>
+    /// Loads an AssetBundle from a file path synchronously.
+    /// </summary>
+    /// <param name="path">The file path of the AssetBundle.</param>
+    /// <returns>The loaded AssetBundle or null if failed.</returns>
+    public static AssetBundle? LoadAssetBundleFromDisk(string path)
+    {
+        try
+        {
+            if (!File.Exists(path))
+            {
+                Debug.LogError($"AssetBundle file not found at: {path}");
+                return null;
+            }
+
+            AssetBundle bundle = AssetBundle.LoadFromFile(path);
+            if (bundle == null)
+            {
+                Debug.LogError($"Failed to load AssetBundle from: {path}");
+            }
+            return bundle;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Exception loading AssetBundle: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Loads an AssetBundle from embedded resources in the application's assembly.
+    /// </summary>
+    /// <param name="assembly">The assembly containing the embedded AssetBundle.</param>
+    /// <param name="resourcePath">The path to the embedded resource.</param>
+    /// <returns>The loaded AssetBundle or null if failed.</returns>
+    public static AssetBundle? LoadAssetBundleFromResources(this Assembly assembly, string resourcePath)
+    {
+        try
+        {
+            using Stream stream = assembly.GetManifestResourceStream(resourcePath);
+            if (stream == null)
+            {
+                Debug.LogError($"Resource not found: {resourcePath}");
+                return null;
+            }
+
+            using MemoryStream ms = new();
+            stream.CopyTo(ms);
+            AssetBundle bundle = AssetBundle.LoadFromMemory(ms.ToArray());
+            if (bundle == null)
+            {
+                Debug.LogError($"Failed to load AssetBundle from embedded resource: {resourcePath}");
+            }
+            return bundle;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Exception loading AssetBundle from resources: {ex.Message}");
+            return null;
+        }
+    }
+
+    internal static string Generate9DigitHash(string input)
     {
         using SHA256 sha256 = SHA256.Create();
         byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));

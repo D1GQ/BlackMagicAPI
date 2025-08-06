@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Patches.Voice;
 using FishNet.Managing;
 using FishNet.Object;
@@ -10,12 +11,12 @@ namespace BlackMagicAPI.Managers;
 
 internal class NetworkObjectManager
 {
-    private static readonly List<(BaseUnityPlugin plugin, string name, Func<Sprite?> getSpriteCallback, Action<int> setIdCallback)> Mapping = [];
-    internal static void SynchronizeItemId(BaseUnityPlugin baseUnity, string name, Func<Sprite?> sprite, Action<int> SetIdCallback)
+    private static readonly List<(BaseUnityPlugin plugin, Type type, Func<Sprite?> getSpriteCallback, Action<int> setIdCallback)> Mapping = [];
+    internal static void SynchronizeItemId(BaseUnityPlugin baseUnity, Type type, Func<Sprite?> sprite, Action<int> SetIdCallback)
     {
-        Mapping.Add((baseUnity, name, sprite, SetIdCallback));
+        Mapping.Add((baseUnity, type, sprite, SetIdCallback));
         var nextId = Resources.FindObjectsOfTypeAll<PlayerInventory>().First().ItemIcons.Length + 1;
-        foreach (var map in Mapping.OrderBy(m => m.plugin.Info.Metadata.GUID).ThenBy(m => m.plugin.Info.Metadata.Name).ThenBy(m => m.plugin.Info.Metadata.Version).ThenBy(m => m.name))
+        foreach (var map in Mapping.OrderBy(m => m.plugin.GetUniqueHash()).ThenBy(m => m.type.FullName))
         {
             PlayerInventoryPatch.SetUiSprite(map.getSpriteCallback.Invoke(), nextId);
             map.setIdCallback(nextId);

@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Patches.Managers;
-using FishNet.Object;
 using System.Text;
 using UnityEngine;
 
@@ -16,26 +15,24 @@ public class BlackMagicManager
     {
         var checksumBuilder = new StringBuilder();
 
-        foreach (var map in SpellManager.Mapping.OrderBy(map => map.data.Plugin?.GetUniqueHash()))
+        foreach (var map in SpellManager.Mapping.OrderBy(map => map.data.Plugin?.GetUniqueHash()).ThenBy(map => map.data.GetType().FullName))
         {
             AppendMappingData(checksumBuilder,
                 map.data?.Plugin?.GetUniqueHash(),
                 map.data?.Id.ToString(),
-                map.data?.Name,
-                map.page?.GetComponent<NetworkObject>()?.PrefabId.ToString());
+                map.data?.GetType().FullName);
         }
 
-        foreach (var map in ItemManager.Mapping.OrderBy(map => map.data.Plugin?.GetUniqueHash()))
+        foreach (var map in ItemManager.Mapping.OrderBy(map => map.data.Plugin?.GetUniqueHash()).ThenBy(map => map.data.GetType().FullName))
         {
             AppendMappingData(checksumBuilder,
                 map.data?.Plugin?.GetUniqueHash(),
                 map.data?.Id.ToString(),
-                map.data?.Name,
-                map.behavior?.GetComponent<NetworkObject>()?.PrefabId.ToString());
+                map.data?.GetType().FullName);
         }
 
         var sb = checksumBuilder.ToString();
-        var hash = sb.Length > 0 ? Utils.GenerateNineDigitHash(sb) : "000 | 000 | 000";
+        var hash = sb.Length > 0 ? Utils.Generate9DigitHash(sb) : "000 | 000 | 000";
         MainMenuManagerPatch.UpdateHash($"(Black Magic Sync)\n{hash}");
     }
 

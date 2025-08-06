@@ -190,12 +190,12 @@ internal static class ItemManager
 
     private static void CreateItem(BaseUnityPlugin baseUnity, ItemData itemData, ItemBehavior itemBehavior)
     {
-        NetworkObjectManager.SynchronizeNetworkObjectPrefab(itemBehavior, $"{baseUnity.GetUniqueHash()}|{itemData.Name}|{itemData.GetType().Name}");
-        NetworkObjectManager.SynchronizeItemId(baseUnity, itemData.Name, itemData.GetUiSprite, (id) =>
+        NetworkObjectManager.SynchronizeItemId(baseUnity, itemData.GetType(), itemData.GetUiSprite, (id) =>
         {
             itemData.Id = id;
             itemBehavior.Id = id;
         });
+        NetworkObjectManager.SynchronizeNetworkObjectPrefab(itemBehavior, $"{baseUnity.GetUniqueHash()}|{itemData.Name}|{itemData.GetType().Name}");
         Mapping.Add((itemData, itemBehavior));
         registeredTypes.Add(itemData.GetType());
         BlackMagicManager.UpdateSyncHash();

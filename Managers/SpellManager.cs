@@ -95,14 +95,14 @@ internal static class SpellManager
                 prefab.hideFlags = HideFlags.HideAndDontSave;
                 UnityEngine.Object.DontDestroyOnLoad(prefab);
                 prefab.name = $"Page{spellData.Name}";
-                NetworkObjectManager.SynchronizeNetworkObjectPrefab(prefab, $"{baseUnity.GetUniqueHash()}|{spellData.Name}|{spellData.GetType().Name}");
-                spellData.SetUpPage(prefab.GetComponent<PageController>(), spellLogic);
-                spellData.SetLight(prefab.GetComponentInChildren<Light>(true));
-                NetworkObjectManager.SynchronizeItemId(baseUnity, spellData.Name, spellData.GetUiSprite, (id) =>
+                NetworkObjectManager.SynchronizeItemId(baseUnity, spellData.GetType(), spellData.GetUiSprite, (id) =>
                 {
                     spellData.Id = id;
                     prefab.ItemID = id;
                 });
+                NetworkObjectManager.SynchronizeNetworkObjectPrefab(prefab, $"{baseUnity.GetUniqueHash()}|{spellData.Name}|{spellData.GetType().Name}");
+                spellData.SetUpPage(prefab.GetComponent<PageController>(), spellLogic);
+                spellData.SetLight(prefab.GetComponentInChildren<Light>(true));
                 Mapping.Add((spellData, prefab));
                 registeredTypes.Add(spellData.GetType());
                 BlackMagicManager.UpdateSyncHash();
