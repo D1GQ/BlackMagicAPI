@@ -8,7 +8,7 @@ internal class ColoseumManagerPatch
 {
     [HarmonyPatch(nameof(ColoseumManager.OnStartClient))]
     [HarmonyPrefix]
-    private static void Start_Prefix(ColoseumManager __instance)
+    private static void OnStartClient_Prefix(ColoseumManager __instance)
     {
         foreach (var (data, page) in SpellManager.Mapping)
         {

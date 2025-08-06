@@ -6,23 +6,12 @@ using UnityEngine;
 
 namespace BlackMagicAPI.Managers;
 
-/// <summary>
-/// Manages the registration and organization of spells within the game.
-/// Handles spell creation, ID assignment, and maintains mappings between spells and their components.
-/// </summary>
-public static class SpellManager
+internal static class SpellManager
 {
     private static readonly List<Type> registeredTypes = [];
     internal static List<(SpellData data, PageController page)> Mapping = [];
 
-    /// <summary>
-    /// Registers a new spell with the spell management system.
-    /// </summary>
-    /// <param name="baseUnity">The plugin registering the spell.</param>
-    /// <param name="SpellDataType">The type of the spell data (must inherit from SpellData).</param>
-    /// <param name="SpellLogicType">The type of the spell logic (must inherit from SpellLogic, optional if prefab is provided).</param>
-    /// <exception cref="InvalidCastException">Thrown if spell data cannot be created or cast to SpellData.</exception>
-    public static void RegisterSpell(BaseUnityPlugin baseUnity, Type SpellDataType, Type? SpellLogicType = null)
+    internal static void RegisterSpell(BaseUnityPlugin baseUnity, Type SpellDataType, Type? SpellLogicType = null)
     {
         if (SpellDataType.IsAbstract)
         {

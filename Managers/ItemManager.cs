@@ -7,23 +7,12 @@ using UnityEngine;
 
 namespace BlackMagicAPI.Managers;
 
-/// <summary>
-/// Manages the registration and organization of spells within the game.
-/// Handles spell creation, ID assignment, and maintains mappings between spells and their components.
-/// </summary>
-public static class ItemManager
+internal static class ItemManager
 {
     private static readonly List<Type> registeredTypes = [];
     internal static readonly List<(ItemData data, ItemBehavior behavior)> Mapping = [];
 
-    /// <summary>
-    /// Registers a crafting recipe by validating and locating the required item and spell prefabs.
-    /// </summary>
-    /// <param name="baseUnity">The plugin registering the recipe</param>
-    /// <param name="IItemInteraction_FirstType">Type of the first item in the recipe (must implement IItemInteraction or SpellLogic/ISpell but not be the interface itself)</param>
-    /// <param name="IItemInteraction_SecondType">Type of the second item in the recipe (must implement IItemInteraction or SpellLogic/ISpell  but not be the interface itself)</param>
-    /// <param name="IItemInteraction_ResultType">Type of the resulting item (must implement IItemInteraction or SpellLogic/ISpell  but not be the interface itself)</param>
-    public static void RegisterCraftingRecipe(BaseUnityPlugin baseUnity, Type IItemInteraction_FirstType, Type IItemInteraction_SecondType, Type IItemInteraction_ResultType)
+    internal static void RegisterCraftingRecipe(BaseUnityPlugin baseUnity, Type IItemInteraction_FirstType, Type IItemInteraction_SecondType, Type IItemInteraction_ResultType)
     {
         if (IItemInteraction_FirstType.IsInterface)
         {
@@ -118,7 +107,7 @@ public static class ItemManager
     /// <param name="ItemDataType">The type of the item data (must inherit from ItemData).</param>
     /// <param name="ItemBehaviorType">The type of the item behavior (must inherit from ItemBehavior, optional if prefab is provided).</param>
     /// <exception cref="InvalidCastException">Thrown if item data cannot be created or cast to ItemData.</exception>
-    public static void RegisterItem(BaseUnityPlugin baseUnity, Type ItemDataType, Type? ItemBehaviorType = null)
+    internal static void RegisterItem(BaseUnityPlugin baseUnity, Type ItemDataType, Type? ItemBehaviorType = null)
     {
         if (ItemDataType.IsAbstract)
         {
