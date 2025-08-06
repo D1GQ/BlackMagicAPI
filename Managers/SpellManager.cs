@@ -1,7 +1,7 @@
 ﻿using BepInEx;
 using BlackMagicAPI.Enums;
-using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Modules.Spells;
+using FishUtilities.Managers;
 using UnityEngine;
 
 namespace BlackMagicAPI.Managers;
@@ -100,7 +100,7 @@ internal static class SpellManager
                     spellData.Id = id;
                     prefab.ItemID = id;
                 });
-                NetworkObjectManager.SynchronizeNetworkObjectPrefab(prefab, Utils.GenerateHash($"{baseUnity.GetUniqueHash()}|{spellData.Name}|{spellData.GetType().Name}"));
+                FishManager.RegisterNetworkObjectPrefab(BMAPlugin.Instance, prefab, spellData.GetType().FullName);
                 spellData.SetUpPage(prefab.GetComponent<PageController>(), spellLogic);
                 spellData.SetLight(prefab.GetComponentInChildren<Light>(true));
                 Mapping.Add((spellData, prefab));

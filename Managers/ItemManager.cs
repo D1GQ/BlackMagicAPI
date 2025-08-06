@@ -1,8 +1,8 @@
 ﻿using BepInEx;
-using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Modules.Items;
 using BlackMagicAPI.Modules.Spells;
 using BlackMagicAPI.Patches.Items;
+using FishUtilities.Managers;
 using UnityEngine;
 
 namespace BlackMagicAPI.Managers;
@@ -195,7 +195,7 @@ internal static class ItemManager
             itemData.Id = id;
             itemBehavior.Id = id;
         });
-        NetworkObjectManager.SynchronizeNetworkObjectPrefab(itemBehavior, Utils.GenerateHash($"{baseUnity.GetUniqueHash()}|{itemData.GetType().FullName}"));
+        FishManager.RegisterNetworkObjectPrefab(BMAPlugin.Instance, itemBehavior, itemData.GetType().FullName);
         Mapping.Add((itemData, itemBehavior));
         registeredTypes.Add(itemData.GetType());
         BlackMagicManager.UpdateSyncHash();

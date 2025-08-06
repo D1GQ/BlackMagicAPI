@@ -1,10 +1,6 @@
 ﻿using BepInEx;
 using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Patches.Voice;
-using FishNet.Managing;
-using FishNet.Object;
-using System.Collections;
-using System.Reflection;
 using UnityEngine;
 
 namespace BlackMagicAPI.Managers;
@@ -22,35 +18,5 @@ internal class NetworkObjectManager
             map.setIdCallback(nextId);
             nextId++;
         }
-    }
-
-    private static ushort? prefabIdStart;
-    private static readonly List<(string id, NetworkObject net)> netObjs = [];
-    internal static void SynchronizeNetworkObjectPrefab(MonoBehaviour mono, string id)
-    {
-        if (mono.TryGetComponent<NetworkObject>(out var net))
-            UnityEngine.Object.DestroyImmediate(net);
-
-        IEnumerator CoWaitForNetwork()
-        {
-            while (NetworkManager.Instances.Count == 0)
-                yield return null;
-            if (mono == null) yield break;
-
-            var netObj = mono.gameObject.AddComponent<NetworkObject>();
-            netObj.NetworkBehaviours = [];
-            NetworkManager.Instances.First().SpawnablePrefabs.AddObject(netObj, true);
-
-            prefabIdStart ??= netObj.PrefabId;
-            var prefabId = prefabIdStart;
-            netObjs.Add((id, netObj));
-            foreach (var item in netObjs.OrderBy(i => i.id))
-            {
-                var prop = typeof(NetworkObject).GetProperty("PrefabId", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                prop?.SetValue(item.net, prefabId);
-                prefabId++;
-            }
-        }
-        mono.StartCoroutine(CoWaitForNetwork());
     }
 }

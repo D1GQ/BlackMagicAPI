@@ -1,5 +1,5 @@
-﻿using BlackMagicAPI.Helpers;
-using FishNet.Serializing;
+﻿using FishNet.Serializing;
+using FishUtilities.Helpers;
 
 namespace BlackMagicAPI.Network;
 
