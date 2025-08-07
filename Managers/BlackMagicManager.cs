@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Patches.Managers;
+using FishNet.Managing;
 using System.Text;
 using UnityEngine;
 
@@ -47,6 +48,82 @@ public class BlackMagicManager
     }
 
     /// <summary>
+    /// Spawns a networked instance of an item of type T in the game world at an optional position and rotation.
+    /// Requires an active NetworkManager and valid item prefab registration.
+    /// </summary>
+    /// <typeparam name="T">Type of item to spawn, must implement IItemInteraction</typeparam>
+    /// <param name="position">Optional world position for the spawned item. If null, uses prefab's default position.</param>
+    /// <param name="rotation">Optional rotation for the spawned item. If null, uses prefab's default rotation.</param>
+    /// <returns>The spawned item instance implementing IItemInteraction</returns>
+    /// <exception cref="InvalidOperationException">Thrown when no NetworkManager instance is available</exception>
+    /// <exception cref="NullReferenceException">Thrown when the item prefab cannot be found</exception>
+    public static T? SpawnItem<T>(Vector3? position = null, Quaternion? rotation = null) where T : IItemInteraction
+    {
+        var network = NetworkManager.Instances.FirstOrDefault() ?? throw new InvalidOperationException("Can not spawn iten when the NetworkManager is null!");
+        if (!network.IsHostStarted)
+        {
+            BMAPlugin.Log.LogError($"Failed to spawn item {typeof(T).Name}: Items can only be spawned as host.");
+            return default;
+        }
+
+        var prefab = GetItemPrefab<T>();
+        if (prefab is MonoBehaviour mono)
+        {
+            var item = UnityEngine.Object.Instantiate(mono);
+            if (position != null)
+                item.transform.position = (Vector3)position;
+            if (rotation != null)
+                item.transform.rotation = (Quaternion)rotation;
+            network.ServerManager.Spawn(item.gameObject);
+
+            BMAPlugin.Log.LogInfo($"Successfully spawned item {typeof(T).Name}.");
+
+            return (T)(IItemInteraction)item;
+        }
+
+        BMAPlugin.Log.LogError($"Failed to spawn item {typeof(T).Name}: Item prefab returned null.");
+        return default;
+    }
+
+    /// <summary>
+    /// Spawns a networked instance of a spell page containing spell of type T in the game world at an optional position and rotation.
+    /// Requires an active NetworkManager and valid spell prefab registration.
+    /// </summary>
+    /// <typeparam name="T">Type of spell to spawn, must implement ISpell</typeparam>
+    /// <param name="position">Optional world position for the spawned spell page. If null, uses prefab's default position.</param>
+    /// <param name="rotation">Optional rotation for the spawned spell page. If null, uses prefab's default rotation.</param>
+    /// <returns>The ISpell component of the spawned spell prefab</returns>
+    /// <exception cref="InvalidOperationException">Thrown when no NetworkManager instance is available</exception>
+    /// <exception cref="NullReferenceException">Thrown when the spell prefab cannot be found</exception>
+    public static PageController? SpawnSpell<T>(Vector3? position = null, Quaternion? rotation = null) where T : ISpell
+    {
+        var network = NetworkManager.Instances.FirstOrDefault() ?? throw new InvalidOperationException("Can not spawn iten when the NetworkManager is null!");
+        if (!network.IsHostStarted)
+        {
+            BMAPlugin.Log.LogError($"Failed to spawn spell page {typeof(T).Name}: Spells can only be spawned as host.");
+            return default;
+        }
+
+        var prefab = GetSpellPagePrefab<T>();
+        if (prefab is PageController page)
+        {
+            var spell = UnityEngine.Object.Instantiate(page);
+            if (position != null)
+                spell.transform.position = (Vector3)position;
+            if (rotation != null)
+                spell.transform.rotation = (Quaternion)rotation;
+            network.ServerManager.Spawn(spell.gameObject);
+
+            BMAPlugin.Log.LogInfo($"Successfully spawned spell page {typeof(T).Name}.");
+
+            return spell;
+        }
+
+        BMAPlugin.Log.LogError($"Failed to spawn spell page {typeof(T).Name}: Spells prefab returned null.");
+        return default;
+    }
+
+    /// <summary>
     /// Registers a crafting recipe by validating and locating the required item and spell prefabs.
     /// </summary>
     /// <param name="plugin">The plugin registering the recipe</param>
@@ -57,6 +134,16 @@ public class BlackMagicManager
         ItemManager.RegisterCraftingRecipe(plugin, IItemInteraction_FirstType, IItemInteraction_SecondType, IItemInteraction_ResultType);
 
     /// <summary>
+    /// Retrieves the prefab of type T that implements IItemInteraction.
+    /// First checks the prefab cache, then custom item mappings, and finally searches through all loaded resources.
+    /// Found prefabs are cached for future lookups.
+    /// </summary>
+    /// <typeparam name="T">The type of item prefab to retrieve, must implement IItemInteraction</typeparam>
+    /// <returns>The cached or newly found item prefab of type T if found, null if not found</returns>
+    /// <exception cref="NullReferenceException">Thrown when the item prefab cannot be found in cache, custom mappings, or resources</exception>
+    public static T? GetItemPrefab<T>() where T : IItemInteraction => ItemManager.GetItemPrefab<T>();
+
+    /// <summary>
     /// Registers a new item with the item management system.
     /// </summary>
     /// <param name="plugin">The plugin registering the spell.</param>
@@ -65,6 +152,16 @@ public class BlackMagicManager
     /// <exception cref="InvalidCastException">Thrown if item data cannot be created or cast to ItemData.</exception>
     public static void RegisterItem(BaseUnityPlugin plugin, Type ItemDataType, Type? ItemBehaviorType = null) =>
         ItemManager.RegisterItem(plugin, ItemDataType, ItemBehaviorType);
+
+    /// <summary>
+    /// Retrieves the spell page prefab containing a spell of type T that implements ISpell.
+    /// First checks the prefab cache, then custom spell mappings, and finally searches through all loaded resources.
+    /// Found prefabs are cached for future lookups.
+    /// </summary>
+    /// <typeparam name="T">The type of spell to search for in page prefabs, must implement ISpell</typeparam>
+    /// <returns>The cached or newly found PageController prefab containing the specified spell type</returns>
+    /// <exception cref="NullReferenceException">Thrown when the page prefab cannot be found in cache, custom mappings, or resources</exception>
+    public static PageController GetSpellPagePrefab<T>() where T : ISpell => SpellManager.GetSpellPagePrefab<T>();
 
     /// <summary>
     /// Registers a new spell with the spell management system.

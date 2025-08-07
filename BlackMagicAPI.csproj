@@ -6,6 +6,7 @@
 		<Nullable>enable</Nullable>
 		<OutputType>Library</OutputType>
 		<langVersion>preview</langVersion>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -11,6 +11,7 @@ internal static class ItemManager
 {
     private static readonly List<Type> registeredTypes = [];
     internal static readonly List<(ItemData data, ItemBehavior behavior)> Mapping = [];
+    internal static readonly Dictionary<Type, IItemInteraction> PrefabMapping = [];
 
     internal static void RegisterCraftingRecipe(BaseUnityPlugin baseUnity, Type IItemInteraction_FirstType, Type IItemInteraction_SecondType, Type IItemInteraction_ResultType)
     {
@@ -100,13 +101,30 @@ internal static class ItemManager
         return null;
     }
 
-    /// <summary>
-    /// Registers a new item with the item management system.
-    /// </summary>
-    /// <param name="baseUnity">The plugin registering the spell.</param>
-    /// <param name="ItemDataType">The type of the item data (must inherit from ItemData).</param>
-    /// <param name="ItemBehaviorType">The type of the item behavior (must inherit from ItemBehavior, optional if prefab is provided).</param>
-    /// <exception cref="InvalidCastException">Thrown if item data cannot be created or cast to ItemData.</exception>
+    internal static T? GetItemPrefab<T>() where T : IItemInteraction
+    {
+        if (PrefabMapping.TryGetValue(typeof(T), out var behavior))
+        {
+            return (T)behavior;
+        }
+
+        var customItem = Mapping.Select(map => (IItemInteraction)map.behavior)?.FirstOrDefault(behavior => behavior.GetType() == typeof(T));
+        if (customItem != null)
+        {
+            PrefabMapping[typeof(T)] = customItem;
+            return (T)customItem;
+        }
+
+        T? item = (T)(IItemInteraction)Resources.FindObjectsOfTypeAll(typeof(T)).FirstOrDefault();
+        if (item != null)
+        {
+            PrefabMapping[typeof(T)] = item;
+            return item;
+        }
+
+        throw new NullReferenceException("Item prefab could not be found!");
+    }
+
     internal static void RegisterItem(BaseUnityPlugin baseUnity, Type ItemDataType, Type? ItemBehaviorType = null)
     {
         if (ItemDataType.IsAbstract)

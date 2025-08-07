@@ -10,6 +10,32 @@ internal static class SpellManager
 {
     private static readonly List<Type> registeredTypes = [];
     internal static List<(SpellData data, PageController page)> Mapping = [];
+    internal static readonly Dictionary<Type, PageController> PrefabMapping = [];
+
+    internal static PageController GetSpellPagePrefab<T>() where T : ISpell
+    {
+        if (PrefabMapping.TryGetValue(typeof(T), out var p))
+        {
+            return p;
+        }
+
+        var customPage = Mapping.Select(map => map.page)?.FirstOrDefault(page => page.spellprefab.GetComponent<ISpell>()?.GetType() == typeof(T));
+        if (customPage != null)
+        {
+            PrefabMapping[typeof(T)] = customPage;
+            return customPage;
+        }
+
+        PageController? page = (PageController)Resources.FindObjectsOfTypeAll(typeof(PageController))
+            .FirstOrDefault(page => page is PageController pageController && pageController.spellprefab.GetComponent<ISpell>()?.GetType() == typeof(T));
+        if (page != null)
+        {
+            PrefabMapping[typeof(T)] = page;
+            return page;
+        }
+
+        throw new NullReferenceException("Page prefab could not be found!");
+    }
 
     internal static void RegisterSpell(BaseUnityPlugin baseUnity, Type SpellDataType, Type? SpellLogicType = null)
     {
