@@ -14,9 +14,19 @@ internal class MainMenuManagerNetworkedPatch
     {
         foreach (var spellData in SpellManager.Mapping.Select(value => value.data))
         {
-            var sc = __instance.AddComponent<CustomSpellCommand>();
-            sc.enabled = true;
-            sc.SpellData = spellData;
+            AddSpellCommand(__instance, spellData, spellData.Name);
+            foreach (var subName in spellData.SubNames)
+            {
+                AddSpellCommand(__instance, spellData, subName);
+            }
         }
+    }
+
+    private static void AddSpellCommand(MainMenuManagerNetworked __instance, SpellData spellData, string name)
+    {
+        var sc = __instance.AddComponent<CustomSpellCommand>();
+        sc.enabled = true;
+        sc.SpellData = spellData;
+        sc.SpellName = name;
     }
 }

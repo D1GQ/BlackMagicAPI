@@ -18,6 +18,17 @@ internal class PageControllerPatch
     private static bool IsCustomSpell(PageController __instance) => __instance.spellprefab.GetComponent<SpellLogic>() != null;
     private static SpellLogic GetSpellPrefab(PageController __instance) => __instance.spellprefab.GetComponent<SpellLogic>();
 
+    [HarmonyPatch(nameof(PageController.Interaction))]
+    [HarmonyPrefix]
+    private static void Interaction_Prefix(PageController __instance, GameObject player)
+    {
+        if (IsCustomSpell(__instance))
+        {
+            var logicPrefab = __instance.spellprefab.GetComponent<SpellLogic>();
+            logicPrefab?.OnPageItemUse(player, __instance);
+        }
+    }
+
     [HarmonyPatch(nameof(PageController.CastSpellServer))]
     [HarmonyPrefix]
     private static bool CastSpellServer_Prefix(PageController __instance, GameObject ownerobj, Vector3 fwdVector, int level, Vector3 spawnpos)
@@ -111,7 +122,7 @@ internal class PageControllerPatch
                 dataWriter.ReadToBuffer(PooledReader0);
                 spell.SyncData(dataWriter.GetObjectBuffer());
                 dataWriter.Dispose();
-                spell.CastSpell(ownerobj, spawnpos, fwdVector, level);
+                spell.CastSpell(ownerobj, __instance, spawnpos, fwdVector, level);
             }
         }
     }

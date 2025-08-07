@@ -17,7 +17,16 @@ public abstract class SpellLogic : MonoBehaviour, ISpell
     /// <param name="playerObj">The GameObject of the player casting the spell.</param>
     /// <param name="viewDirectionVector">The direction vector of the player's view.</param>
     /// <param name="castingLevel">The power level of the spell cast.</param>
-    public abstract void CastSpell(GameObject playerObj, Vector3 spawnPos, Vector3 viewDirectionVector, int castingLevel);
+    public abstract void CastSpell(GameObject playerObj, PageController page, Vector3 spawnPos, Vector3 viewDirectionVector, int castingLevel);
+
+    /// <summary>
+    /// Virtual method for handling item-specific usage logic for spell page.
+    /// </summary>
+    /// <param name="itemOwner">The player using the item</param>
+    /// <remarks>
+    /// Note that this code executes within the SpellLogic prefab, so avoid modifying anything within the prefab itself!
+    /// </remarks>
+    public virtual void OnPageItemUse(GameObject itemOwner, PageController page) { }
 
     /// <summary>
     /// Called automatically when a spell prefab is created programmatically.

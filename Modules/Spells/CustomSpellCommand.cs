@@ -7,6 +7,7 @@ namespace BlackMagicAPI.Modules.Spells;
 
 internal class CustomSpellCommand : MonoBehaviour, ISpellCommand
 {
+    internal string SpellName { get; set; } = "[]";
     internal SpellData SpellData { get; set; }
     private PlayerInventory? playerInventory { get; set; }
     private SpeechRecognizer? speechRecognizer { get; set; }
@@ -16,7 +17,7 @@ internal class CustomSpellCommand : MonoBehaviour, ISpellCommand
         Resources.FindObjectsOfTypeAll<VoiceControlListener>()?.First()?.SpellPages?.Add(this);
     }
 
-    public string GetSpellName() => SpellData.Name.ToLower() ?? "???";
+    public string GetSpellName() => SpellName.ToLower();
 
     public void ResetVoiceDetect()
     {
@@ -31,11 +32,11 @@ internal class CustomSpellCommand : MonoBehaviour, ISpellCommand
         }
 
 
-        string spellNameLower = SpellData.Name.ToLower();
+        string spellNameLower = SpellName.ToLower();
         if (!speechRecognizer.Vocabulary.Contains(spellNameLower))
         {
             speechRecognizer.Vocabulary.Add(spellNameLower);
-            Debug.Log($"Added spell to vocabulary: {spellNameLower}");
+            Debug.Log($"Added spell name to vocabulary: {spellNameLower}");
         }
     }
 

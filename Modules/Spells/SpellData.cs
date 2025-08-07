@@ -53,9 +53,17 @@ public abstract class SpellData
     /// </summary>
     /// <remarks>
     /// This abstract property must be implemented by derived classes to provide the spell's name.
-    /// The name is used for display purposes and for locating spell resources.
+    /// The name is used for display and voice detection purposes.
     /// </remarks>
     public abstract string Name { get; }
+
+    /// <summary>
+    /// Gets the a list of sub names to add onto voice detection.
+    /// </summary>
+    /// <remarks>
+    /// The sub names is used for voice detection purposes.
+    /// </remarks>
+    public virtual string[] SubNames => [];
 
     /// <summary>
     /// Gets the cooldown duration in seconds between spell uses.
