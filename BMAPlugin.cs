@@ -5,9 +5,7 @@ using HarmonyLib;
 
 namespace BlackMagicAPI;
 
-/// <summary>
-/// 
-/// </summary>
+/// <inheritdoc/>
 [BepInProcess("MageArena")]
 [BepInDependency("com.magearena.modsync", BepInDependency.DependencyFlags.HardDependency)]
 [BepInDependency("com.d1gq.fish.utilities", BepInDependency.DependencyFlags.HardDependency)]
@@ -17,15 +15,13 @@ public class BMAPlugin : BaseUnityPlugin
     internal static BMAPlugin Instance { get; private set; }
     private const string MyGUID = "com.d1gq.black.magic.api";
     internal const string PluginName = "BlackMagicAPI";
-    private const string VersionString = "2.2.0";
+    private const string VersionString = "2.2.1";
 
     private static Harmony? Harmony;
     internal static ManualLogSource Log => Instance._log;
     private ManualLogSource? _log;
 
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <inheritdoc/>
     public static string modsync = "all";
 
     private void Awake()

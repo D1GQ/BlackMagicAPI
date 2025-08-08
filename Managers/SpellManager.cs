@@ -100,7 +100,7 @@ internal static class SpellManager
 
     private static SpellLogic CreateSpellLogic(SpellData spellData, Type spellLogicType)
     {
-        var prefab = new GameObject($"{spellData.Name.Trim()}Spell")
+        var prefab = new GameObject($"{spellData.Name.Replace(" ", "")}Spell")
         {
             hideFlags = HideFlags.HideAndDontSave
         };
@@ -120,7 +120,7 @@ internal static class SpellManager
                 var prefab = UnityEngine.Object.Instantiate(pageController);
                 prefab.hideFlags = HideFlags.HideAndDontSave;
                 UnityEngine.Object.DontDestroyOnLoad(prefab);
-                prefab.name = $"Page{spellData.Name}";
+                prefab.name = $"Page{spellData.Name.Replace(" ", "")}";
                 NetworkObjectManager.SynchronizeItemId(baseUnity, spellData.GetType(), spellData.GetUiSprite, (id) =>
                 {
                     spellData.Id = id;

@@ -188,7 +188,7 @@ internal static class ItemManager
 
     private static ItemBehavior CreateItemBehavior(ItemData itemData, Type itemBehaviorType)
     {
-        var prefab = new GameObject($"{itemData.Name.Trim()}Item")
+        var prefab = new GameObject($"{itemData.Name.Replace(" ", "")}Item")
         {
             hideFlags = HideFlags.HideAndDontSave
         };

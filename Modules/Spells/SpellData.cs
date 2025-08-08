@@ -197,6 +197,7 @@ public abstract class SpellData
     {
         page.ItemID = Id;
         page.CoolDown = Cooldown;
+        page.PageCoolDownTimer = -Cooldown;
         page.spellprefab = logic.gameObject;
         // page.pickupText = $"Grasp {Name} Page";
         SetMaterial(page.pagerender.material);

@@ -9,6 +9,7 @@ namespace BlackMagicAPI.Modules.Spells;
 /// </summary>
 public abstract class SpellLogic : MonoBehaviour, ISpell
 {
+    /// <inheritdoc/>
     public void PlayerSetup(GameObject ownerobj, Vector3 fwdVector, int level) { }
 
     /// <summary>
