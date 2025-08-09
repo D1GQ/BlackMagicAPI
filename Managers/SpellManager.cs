@@ -96,6 +96,7 @@ internal static class SpellManager
         }
         logic.gameObject.SetActive(false);
         logic.SpellDataTypeName = spellDataType.FullName;
+        logic.KeepOnDeath = data.KeepOnDeath;
 
         CreateSpell(baseUnity, data, logic);
     }

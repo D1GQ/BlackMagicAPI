@@ -13,7 +13,12 @@ public abstract class SpellLogic : MonoBehaviour, ISpell
     internal static Dictionary<string, List<SpellLogic>> Instances = [];
 
     [SerializeField]
+    [Tooltip("Spelldata Fullname, (DO NOT SET)")]
     internal string? SpellDataTypeName;
+
+    [SerializeField]
+    [Tooltip("Keep item on death, (DO NOT SET)")]
+    internal bool KeepOnDeath;
 
     /// <summary>
     /// Gets whether this instance is a prefab template or an active spell instance.

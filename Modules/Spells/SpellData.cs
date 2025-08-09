@@ -49,6 +49,14 @@ public abstract class SpellData
     public virtual bool CanSpawnInColoseum => true;
 
     /// <summary>
+    /// Gets whether the spell page should be kept on death.
+    /// </summary>
+    /// <value>
+    /// Defaults to false. Override in derived classes to allow keeping spell page on death.
+    /// </value>
+    public virtual bool KeepOnDeath => false;
+
+    /// <summary>
     /// Gets the display name of the spell.
     /// </summary>
     /// <remarks>

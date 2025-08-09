@@ -40,6 +40,10 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
     [Tooltip("Unique identifier for the item type, (DO NOT SET)")]
     internal int Id;
 
+    [SerializeField]
+    [Tooltip("Keep item on death, (DO NOT SET)")]
+    internal bool KeepOnDeath;
+
     /// <summary>
     /// Initializes the network components when the item is created.
     /// </summary>

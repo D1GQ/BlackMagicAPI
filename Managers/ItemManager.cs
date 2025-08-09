@@ -199,6 +199,7 @@ internal static class ItemManager
         render.transform.SetParent(prefab.transform);
         var behavior = (ItemBehavior)prefab.AddComponent(itemBehaviorType);
         behavior.Name = itemData.Name;
+        behavior.KeepOnDeath = itemData.KeepOnDeath;
         behavior.ItemRender = render;
         behavior.EquipSound = itemData.GetPickupAudio();
         behavior.DropSound = itemData.GetEquipAudio();

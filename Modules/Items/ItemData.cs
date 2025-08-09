@@ -50,6 +50,14 @@ public abstract class ItemData
     public virtual bool CanGetFromTrade => false;
 
     /// <summary>
+    /// Gets whether the item should be kept on death.
+    /// </summary>
+    /// <value>
+    /// Defaults to false. Override in derived classes to allow keeping item on death.
+    /// </value>
+    public virtual bool KeepOnDeath => false;
+
+    /// <summary>
     /// Gets the unique numeric identifier for the item type.
     /// </summary>
     /// <remarks>
