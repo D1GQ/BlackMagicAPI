@@ -1,4 +1,5 @@
 ﻿using BlackMagicAPI.Network;
+using System.Collections;
 using UnityEngine;
 
 namespace BlackMagicAPI.Modules.Spells;
@@ -9,6 +10,66 @@ namespace BlackMagicAPI.Modules.Spells;
 /// </summary>
 public abstract class SpellLogic : MonoBehaviour, ISpell
 {
+    internal static Dictionary<string, List<SpellLogic>> Instances = [];
+
+    [SerializeField]
+    internal string? SpellDataTypeName;
+
+    /// <summary>
+    /// Gets whether this instance is a prefab template or an active spell instance.
+    /// </summary>
+    public bool IsPrefab { get; internal set; } = true;
+
+    /// <summary>
+    /// Initializes the spell instance and sets up type references asynchronously.
+    /// </summary>
+    protected virtual void Awake()
+    {
+        StartCoroutine(CoAwake());
+    }
+
+    /// <summary>
+    /// Cleans up the spell instance by removing it from tracking dictionaries when destroyed.
+    /// </summary>
+    protected virtual void OnDestroy()
+    {
+        if (SpellDataTypeName != null && Instances.TryGetValue(SpellDataTypeName, out var list))
+        {
+            list.Remove(this);
+
+            if (list.Count <= 0)
+            {
+                Instances.Remove(SpellDataTypeName);
+            }
+        }
+    }
+
+    private IEnumerator CoAwake()
+    {
+        while (SpellDataTypeName == null)
+        {
+            yield return null;
+        }
+
+        float wait = 0f;
+        while (IsPrefab)
+        {
+            wait += Time.deltaTime;
+            if (wait > 5f)
+            {
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        if (!Instances.ContainsKey(SpellDataTypeName))
+        {
+            Instances[SpellDataTypeName] = [];
+        }
+        Instances[SpellDataTypeName].Add(this);
+    }
+
     /// <inheritdoc/>
     public void PlayerSetup(GameObject ownerobj, Vector3 fwdVector, int level) { }
 
@@ -16,6 +77,8 @@ public abstract class SpellLogic : MonoBehaviour, ISpell
     /// Contains the core spell casting logic to be implemented by derived classes.
     /// </summary>
     /// <param name="playerObj">The GameObject of the player casting the spell.</param>
+    /// <param name="page">The PageController containing spell information.</param>
+    /// <param name="spawnPos">The position where the spell should be spawned.</param>
     /// <param name="viewDirectionVector">The direction vector of the player's view.</param>
     /// <param name="castingLevel">The power level of the spell cast.</param>
     public abstract void CastSpell(GameObject playerObj, PageController page, Vector3 spawnPos, Vector3 viewDirectionVector, int castingLevel);
@@ -24,6 +87,7 @@ public abstract class SpellLogic : MonoBehaviour, ISpell
     /// Virtual method for handling item-specific usage logic for spell page.
     /// </summary>
     /// <param name="itemOwner">The player using the item</param>
+    /// <param name="page">The PageController containing spell information</param>
     /// <remarks>
     /// Note that this code executes within the SpellLogic prefab, so avoid modifying anything within the prefab itself!
     /// </remarks>
@@ -52,4 +116,12 @@ public abstract class SpellLogic : MonoBehaviour, ISpell
     /// </summary>
     /// <param name="values">An array of objects containing the data to sync from WriteData.</param>
     public virtual void SyncData(object[] values) { }
+
+    /// <summary>
+    /// Cleans up and destroys the spell GameObject.
+    /// </summary>
+    public void DisposeSpell()
+    {
+        Destroy(gameObject);
+    }
 }

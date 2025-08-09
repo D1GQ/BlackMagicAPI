@@ -94,6 +94,8 @@ internal static class SpellManager
 
             logic = CreateSpellLogic(data, spellLogicType);
         }
+        logic.gameObject.SetActive(false);
+        logic.SpellDataTypeName = spellDataType.FullName;
 
         CreateSpell(baseUnity, data, logic);
     }

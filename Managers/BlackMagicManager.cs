@@ -16,20 +16,20 @@ public class BlackMagicManager
     {
         var checksumBuilder = new StringBuilder();
 
-        foreach (var map in SpellManager.Mapping.OrderBy(map => map.data.Plugin?.GetUniqueHash()).ThenBy(map => map.data.GetType().FullName))
+        foreach (var (data, _) in SpellManager.Mapping.OrderBy(map => map.data.Plugin?.GetUniqueHash()).ThenBy(map => map.data.GetType().FullName))
         {
             AppendMappingData(checksumBuilder,
-                map.data?.Plugin?.GetUniqueHash(),
-                map.data?.Id.ToString(),
-                map.data?.GetType().FullName);
+                data?.Plugin?.GetUniqueHash(),
+                data?.Id.ToString(),
+                data?.GetType().FullName);
         }
 
-        foreach (var map in ItemManager.Mapping.OrderBy(map => map.data.Plugin?.GetUniqueHash()).ThenBy(map => map.data.GetType().FullName))
+        foreach (var (data, _) in ItemManager.Mapping.OrderBy(map => map.data.Plugin?.GetUniqueHash()).ThenBy(map => map.data.GetType().FullName))
         {
             AppendMappingData(checksumBuilder,
-                map.data?.Plugin?.GetUniqueHash(),
-                map.data?.Id.ToString(),
-                map.data?.GetType().FullName);
+                data?.Plugin?.GetUniqueHash(),
+                data?.Id.ToString(),
+                data?.GetType().FullName);
         }
 
         var sb = checksumBuilder.ToString();

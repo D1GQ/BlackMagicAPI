@@ -116,8 +116,10 @@ internal class PageControllerPatch
         if (ownerobj != null)
         {
             GameObject gameObject = UnityEngine.Object.Instantiate(__instance.spellprefab, spawnpos, Quaternion.identity);
+            gameObject.SetActive(true);
             if (gameObject.TryGetComponent<SpellLogic>(out var spell))
             {
+                spell.IsPrefab = false;
                 var dataWriter = new DataWriter();
                 dataWriter.ReadToBuffer(PooledReader0);
                 spell.SyncData(dataWriter.GetObjectBuffer());

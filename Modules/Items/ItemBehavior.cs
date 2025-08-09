@@ -4,6 +4,7 @@ using FishNet.Object;
 using FishNet.Object.Delegating;
 using FishNet.Serializing;
 using FishNet.Transporting;
+using System.Collections;
 using UnityEngine;
 
 namespace BlackMagicAPI.Modules.Items;
@@ -16,14 +17,17 @@ namespace BlackMagicAPI.Modules.Items;
 [RequireComponent(typeof(Collider))]
 public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInteraction
 {
+    /// <inheritdoc/>
     [SerializeField]
     [Tooltip("The visual representation of the item in the game world, be sure that it's parenting to this object!")]
     public GameObject? ItemRender;
 
+    /// <inheritdoc/>
     [SerializeField]
     [Tooltip("Sound played when the item is picked up")]
     public AudioClip? EquipSound;
 
+    /// <inheritdoc/>
     [SerializeField]
     [Tooltip("Sound played when the item is dropped")]
     public AudioClip? DropSound;
@@ -64,6 +68,10 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
     {
         ItemRender?.SetActive(true);
         PlayEquipSound();
+        if (!waitingInitItem)
+        {
+            StartCoroutine(CoWaitInitItem());
+        }
     }
 
     /// <summary>
@@ -72,6 +80,27 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
     public void ItemInitObs()
     {
         ItemInit();
+    }
+
+    private bool waitingInitItem;
+    private IEnumerator CoWaitInitItem()
+    {
+        waitingInitItem = true;
+        float wait = 0f;
+        while (transform?.parent?.name != "pikupact")
+        {
+            wait += Time.deltaTime;
+            if (wait >= 10f)
+            {
+                waitingInitItem = false;
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        OnItemEquipped(transform.parent.parent.GetComponent<PlayerMovement>());
+        waitingInitItem = false;
     }
 
     /// <summary>
@@ -89,17 +118,22 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
     /// <param name="player">The player using the item</param>
     public void Interaction(GameObject player)
     {
-        OnItemUse(player);
+        OnItemUse(player.GetComponent<PlayerMovement>());
     }
 
     /// <summary>
     /// Virtual method for handling item-specific usage logic.
     /// </summary>
     /// <param name="itemOwner">The player using the item</param>
-    protected virtual void OnItemUse(GameObject itemOwner)
-    {
-        // To be overridden by derived classes
-    }
+#pragma warning disable CS0618 // Type or member is obsolete
+    protected virtual void OnItemUse(PlayerMovement itemOwner) { OnItemUse(itemOwner.gameObject); }
+#pragma warning restore CS0618 // Type or member is obsolete
+
+    /// <summary>
+    /// Virtual method for handling item-specific Equipped logic.
+    /// </summary>
+    /// <param name="itemOwner">The player using the item</param>
+    protected virtual void OnItemEquipped(PlayerMovement itemOwner) { }
 
     /// <summary>
     /// Placeholder for secondary interaction (unused).
@@ -214,4 +248,14 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
         HandleItemSync(syncId, dataWriter.GetObjectBuffer());
         dataWriter.Dispose();
     }
+
+    /// <summary>
+    /// (Deprecated) Virtual method for handling item-specific usage logic.
+    /// </summary>
+    /// <param name="itemOwner">The player GameObject using the item</param>
+    /// <remarks>
+    /// This method is obsolete. Override OnItemUse(PlayerMovement) instead.
+    /// </remarks>
+    [Obsolete("This method is deprecated. Please override OnItemUse(PlayerMovement) instead.")]
+    protected virtual void OnItemUse(GameObject itemOwner) { }
 }
