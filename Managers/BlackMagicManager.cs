@@ -8,8 +8,13 @@ using UnityEngine;
 namespace BlackMagicAPI.Managers;
 
 /// <summary>
-/// 
+/// Provides core management functionality for the Black Magic API, including spell/item registration,
+/// spawning, crafting recipes, and death icons. Serves as the main entry point for API interactions.
 /// </summary>
+/// <remarks>
+/// All operations are network-aware and include appropriate safety checks. Most methods will return
+/// null/default rather than throw exceptions for non-critical failures, with errors logged to BepInEx.
+/// </remarks>
 public class BlackMagicManager
 {
     internal static void UpdateSyncHash()
