@@ -1,11 +1,11 @@
 ﻿using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Modules.Spells;
+using BlackMagicAPI.Network;
 using FishNet.Connection;
 using FishNet.Managing;
 using FishNet.Object;
 using FishNet.Serializing;
 using FishNet.Transporting;
-using FishUtilities.Network;
 using HarmonyLib;
 using System.Reflection;
 using UnityEngine;

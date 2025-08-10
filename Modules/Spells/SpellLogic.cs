@@ -1,4 +1,4 @@
-﻿using FishUtilities.Network;
+﻿using BlackMagicAPI.Network;
 using System.Collections;
 using UnityEngine;
 
@@ -106,7 +106,8 @@ public abstract class SpellLogic : MonoBehaviour, ISpell
     public virtual void OnPrefabCreatedAutomatically(GameObject prefab) { }
 
     /// <summary>
-    /// Castor writes data to a <see cref="DataWriter"/> for serialization to send to clients.
+    /// Castor writes data to a <see cref="
+    /// "/> for serialization to send to clients.
     /// </summary>
     /// <param name="dataWriter">The writer used to serialize data.</param>
     /// <param name="page">The page controller associated with the data.</param>
