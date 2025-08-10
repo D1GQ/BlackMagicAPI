@@ -169,6 +169,16 @@ public class BlackMagicManager
     public static PageController GetSpellPagePrefab<T>() where T : ISpell => SpellManager.GetSpellPagePrefab<T>();
 
     /// <summary>
+    /// Retrieves the spell logic prefab containing a spell of type T that implements ISpell.
+    /// First checks the prefab cache, then custom spell mappings, and finally searches through all loaded resources.
+    /// Found prefabs are cached for future lookups.
+    /// </summary>
+    /// <typeparam name="T">The type of spell to search for in page prefabs, must implement ISpell</typeparam>
+    /// <returns>The cached or newly found PageController prefab containing the specified spell type</returns>
+    /// <exception cref="NullReferenceException">Thrown when the page prefab cannot be found in cache, custom mappings, or resources</exception>
+    public static T GetSpellLogicPrefab<T>() where T : ISpell => SpellManager.GetSpellLogicPrefab<T>();
+
+    /// <summary>
     /// Registers a new spell with the spell management system.
     /// </summary>
     /// <param name="plugin">The plugin registering the spell.</param>

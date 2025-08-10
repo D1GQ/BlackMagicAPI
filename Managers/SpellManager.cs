@@ -12,6 +12,17 @@ internal static class SpellManager
     internal static List<(SpellData data, PageController page)> Mapping = [];
     internal static readonly Dictionary<Type, PageController> PrefabMapping = [];
 
+    internal static T GetSpellLogicPrefab<T>() where T : ISpell
+    {
+        var prefab = GetSpellPagePrefab<T>().spellprefab;
+        if (prefab.TryGetComponent<T>(out var comp))
+        {
+            return comp;
+        }
+
+        throw new NullReferenceException("Logic prefab could not be found!");
+    }
+
     internal static PageController GetSpellPagePrefab<T>() where T : ISpell
     {
         if (PrefabMapping.TryGetValue(typeof(T), out var p))
