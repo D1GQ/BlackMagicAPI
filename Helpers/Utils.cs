@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace BlackMagicAPI.Helpers;
 
+/// <summary>
+/// Basic utilities for modding Mage Arena.
+/// </summary>
 public static class Utils
 {
     /// <summary>
