@@ -40,9 +40,10 @@ internal class ChestNetControllerPatch
             {
                 if (map.data.DebugForceSpawn)
                 {
-                    var gameObject = UnityEngine.Object.Instantiate(map.behavior.gameObject);
-                    gameObject.transform.position = __instance.ItemPoints[__instance.slotnum].transform.position;
-                    __instance.ServerManager.Spawn(gameObject, null, default);
+                    var behavior = UnityEngine.Object.Instantiate(map.behavior);
+                    behavior.transform.position = __instance.ItemPoints[__instance.slotnum].transform.position;
+                    behavior.SetDefaultTransforms();
+                    __instance.ServerManager.Spawn(behavior.gameObject, null, default);
 
                     if (__instance.slotnum >= 4)
                         __instance.slotnum = 0;

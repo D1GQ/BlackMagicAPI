@@ -14,9 +14,13 @@ namespace BlackMagicAPI.Modules.Items;
 /// Provides the core interface for item functionality and initialization.
 /// </summary>
 [RequireComponent(typeof(AudioSource))]
-[RequireComponent(typeof(Collider))]
 public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInteraction
 {
+    /// <summary>
+    /// The last owner of the item.
+    /// </summary>
+    public PlayerMovement? LastOwner { get; private set; }
+
     /// <inheritdoc/>
     [SerializeField]
     [Tooltip("The visual representation of the item in the game world, be sure that it's parenting to this object!")]
@@ -103,7 +107,8 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
             yield return null;
         }
 
-        OnItemEquipped(transform.parent.parent.GetComponent<PlayerMovement>());
+        LastOwner = transform.parent.parent.GetComponent<PlayerMovement>();
+        OnItemEquipped(LastOwner);
         waitingInitItem = false;
     }
 
@@ -137,7 +142,13 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
     /// Virtual method for handling item-specific Equipped logic.
     /// </summary>
     /// <param name="itemOwner">The player using the item</param>
-    protected virtual void OnItemEquipped(PlayerMovement itemOwner) { }
+    public virtual void OnItemEquipped(PlayerMovement itemOwner) { }
+
+    /// <summary>
+    /// Virtual method for handling item-specific Dropped logic.
+    /// </summary>
+    /// <param name="itemOwner">The player using the item</param>
+    public virtual void OnItemDropped(PlayerMovement itemOwner) { }
 
     /// <summary>
     /// Placeholder for secondary interaction (unused).
@@ -153,11 +164,15 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
         LayerMask mask = 192;
         if (Physics.Raycast(transform.position, Vector3.down, out var raycastHit, 100f, ~mask))
         {
-            transform.rotation = Quaternion.Euler(0f, 0f, 90f);
+            SetDefaultTransforms();
             transform.position = raycastHit.point;
         }
         ItemRender?.SetActive(true);
         PlayDropSound();
+        if (LastOwner != null)
+        {
+            OnItemDropped(LastOwner);
+        }
     }
 
     /// <summary>
@@ -184,12 +199,30 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
     }
 
     /// <summary>
-    /// Resets the item's scale and rotation to default values.
+    /// (Obsolete) Resets the item's scale and rotation to default values.
     /// </summary>
+    [Obsolete("Use SetDefaultTransforms instead.")]
     public virtual void SetScale()
     {
+        SetDefaultTransforms();
+    }
+
+    /// <summary>
+    /// Resets the item's scale and rotation to default values.
+    /// </summary>
+    public virtual void SetDefaultTransforms()
+    {
         transform.localScale = Vector3.one;
-        transform.rotation = Quaternion.Euler(0f, 0f, 90f);
+        transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+    }
+
+    /// <summary>
+    /// Sets the item scale and rotation on crafting forge.
+    /// </summary>
+    public virtual void SetTransformOnCraftingForge()
+    {
+        transform.localScale = Vector3.one;
+        transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
     }
 
     internal void SetAudioClips(AudioClip drop, AudioClip equip)
@@ -202,8 +235,18 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
     /// Called automatically when a item prefab is created programmatically.
     /// Allows for custom initialization of item prefabs.
     /// </summary>
-    /// <param name="prefab">The GameObject of the created spell prefab</param>
+    /// <param name="prefab">The GameObject of the created item prefab</param>
     public virtual void OnPrefabCreatedAutomatically(GameObject prefab) { }
+
+    /// <summary>
+    /// Called automatically when a item prefab is created programmatically.
+    /// Allows for custom colliders for item collision.
+    /// </summary>
+    /// <param name="prefab">The GameObject of the created item prefab</param>
+    public virtual void AddColliderToPrefab(GameObject prefab)
+    {
+        prefab.AddComponent<BoxCollider>();
+    }
 
     private bool netInit;
     private void NetworkInitialize()

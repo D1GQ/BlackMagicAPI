@@ -193,16 +193,17 @@ internal static class ItemManager
             hideFlags = HideFlags.HideAndDontSave
         };
         UnityEngine.Object.DontDestroyOnLoad(prefab);
-        prefab.AddComponent<BoxCollider>();
         prefab.AddComponent<AudioSource>();
         var render = new GameObject("ItemRender");
         render.transform.SetParent(prefab.transform);
+        render.transform.rotation = Quaternion.Euler(-90f, 180f, 0f);
         var behavior = (ItemBehavior)prefab.AddComponent(itemBehaviorType);
         behavior.Name = itemData.Name;
         behavior.KeepOnDeath = itemData.KeepOnDeath;
         behavior.ItemRender = render;
         behavior.EquipSound = itemData.GetPickupAudio();
         behavior.DropSound = itemData.GetEquipAudio();
+        behavior.AddColliderToPrefab(prefab);
         behavior.OnPrefabCreatedAutomatically(behavior.gameObject);
         return behavior;
     }

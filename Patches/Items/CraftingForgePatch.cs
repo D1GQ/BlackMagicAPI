@@ -43,7 +43,7 @@ internal class CraftingForgePatch
 
     [HarmonyPatch(nameof(CraftingForge.OnStartClient))]
     [HarmonyPostfix]
-    private static void PlaceItemIn_Postfix(CraftingForge __instance)
+    private static void OnStartClient_Postfix(CraftingForge __instance)
     {
         __instance.StartCoroutine(CoCustomCrafter(__instance));
     }

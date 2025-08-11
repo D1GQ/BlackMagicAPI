@@ -1,7 +1,9 @@
-﻿using BlackMagicAPI.Managers;
+﻿using BlackMagicAPI.Helpers;
+using BlackMagicAPI.Managers;
 using BlackMagicAPI.Modules.Items;
 using BlackMagicAPI.Modules.Spells;
 using HarmonyLib;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -105,5 +107,20 @@ internal class PlayerInventoryPatch
         }
 
         return false;
+    }
+
+    [HarmonyPatch]
+    private static class PlaceOnCraftingTablePatch
+    {
+        private static MethodBase TargetMethod() => Utils.PatchRpcMethod<PlayerInventory>("RpcLogic___PlaceOnCraftingTableObserver");
+
+        [HarmonyPostfix]
+        private static void Postfix(GameObject obj, GameObject CrIn)
+        {
+            if (obj.TryGetComponent<ItemBehavior>(out var itemBehavior))
+            {
+                itemBehavior.SetTransformOnCraftingForge();
+            }
+        }
     }
 }
