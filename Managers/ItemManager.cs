@@ -56,11 +56,11 @@ internal static class ItemManager
         if (firstItemPrefab != null)
         {
             MonoBehaviour? secondItemPrefab = !typeof(ISpell).IsAssignableFrom(IItemInteraction_SecondType) ? Resources.FindObjectsOfTypeAll(IItemInteraction_SecondType)?.First() as MonoBehaviour :
-                GetPageFromSpellType(IItemInteraction_FirstType);
+                GetPageFromSpellType(IItemInteraction_SecondType);
             if (secondItemPrefab != null)
             {
                 MonoBehaviour? resultItemPrefab = !typeof(ISpell).IsAssignableFrom(IItemInteraction_SecondType) ? Resources.FindObjectsOfTypeAll(IItemInteraction_ResultType)?.First() as MonoBehaviour :
-                    GetPageFromSpellType(IItemInteraction_FirstType);
+                    GetPageFromSpellType(IItemInteraction_ResultType);
                 if (resultItemPrefab != null)
                 {
                     if (CraftingForgePatch.RegisterRecipe(firstItemPrefab.gameObject, secondItemPrefab.gameObject, resultItemPrefab.gameObject))

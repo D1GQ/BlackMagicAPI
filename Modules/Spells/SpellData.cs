@@ -100,7 +100,10 @@ public abstract class SpellData
     /// </remarks>
     public int Id { get; internal set; }
 
-    internal BaseUnityPlugin? Plugin { get; set; }
+    /// <summary>
+    /// The plugin that adds the spell.
+    /// </summary>
+    public BaseUnityPlugin? Plugin { get; internal set; }
 
     /// <summary>
     /// Loads the UI icon sprite for this spell from the plugin's resources.

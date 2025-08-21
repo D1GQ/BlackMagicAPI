@@ -10,6 +10,11 @@ namespace BlackMagicAPI.Modules.Spells;
 public class Spell<SD> where SD : SpellData
 {
     /// <summary>
+    /// Gets the data class for the spell.
+    /// </summary>
+    public static SD? GetData() => (SD)SpellManager.Mapping.FirstOrDefault(map => map.data.GetType() == typeof(SD)).data;
+
+    /// <summary>
     /// Gets the prefab PageController associated with this spell type from the SpellManager.
     /// Returns null if no matching spell mapping is found.
     /// </summary>

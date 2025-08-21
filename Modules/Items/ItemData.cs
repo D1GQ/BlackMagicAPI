@@ -65,7 +65,10 @@ public abstract class ItemData
     /// </remarks>
     public int Id { get; internal set; }
 
-    internal BaseUnityPlugin? Plugin { get; set; }
+    /// <summary>
+    /// The plugin that adds the item.
+    /// </summary>
+    public BaseUnityPlugin? Plugin { get; internal set; }
 
     /// <summary>
     /// Loads the UI sprite for this item from the plugin's resources.
