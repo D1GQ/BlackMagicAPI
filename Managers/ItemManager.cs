@@ -10,7 +10,7 @@ namespace BlackMagicAPI.Managers;
 internal static class ItemManager
 {
     private static readonly List<Type> registeredTypes = [];
-    internal static readonly List<(ItemData data, ItemBehavior behavior)> Mapping = [];
+    internal static List<(ItemData data, ItemBehavior behavior)> Mapping = [];
     internal static readonly Dictionary<Type, IItemInteraction> PrefabMapping = [];
 
     internal static void RegisterCraftingRecipe(BaseUnityPlugin baseUnity, Type IItemInteraction_FirstType, Type IItemInteraction_SecondType, Type IItemInteraction_ResultType)
@@ -101,24 +101,26 @@ internal static class ItemManager
         return null;
     }
 
-    internal static T? GetItemPrefab<T>() where T : IItemInteraction
+    internal static T? GetItemPrefab<T>() where T : IItemInteraction => (T?)GetItemPrefab(typeof(T));
+
+    internal static IItemInteraction? GetItemPrefab(Type IItemInteraction_Type)
     {
-        if (PrefabMapping.TryGetValue(typeof(T), out var behavior))
+        if (PrefabMapping.TryGetValue(IItemInteraction_Type, out var behavior))
         {
-            return (T)behavior;
+            return behavior;
         }
 
-        var customItem = Mapping.Select(map => (IItemInteraction)map.behavior)?.FirstOrDefault(behavior => behavior.GetType() == typeof(T));
+        IItemInteraction? customItem = Mapping.Select(map => (IItemInteraction)map.behavior)?.FirstOrDefault(behavior => behavior.GetType() == IItemInteraction_Type);
         if (customItem != null)
         {
-            PrefabMapping[typeof(T)] = customItem;
-            return (T)customItem;
+            PrefabMapping[IItemInteraction_Type] = customItem;
+            return customItem;
         }
 
-        T? item = (T)(IItemInteraction)Resources.FindObjectsOfTypeAll(typeof(T)).FirstOrDefault();
+        IItemInteraction? item = (IItemInteraction)Resources.FindObjectsOfTypeAll(IItemInteraction_Type).FirstOrDefault();
         if (item != null)
         {
-            PrefabMapping[typeof(T)] = item;
+            PrefabMapping[IItemInteraction_Type] = item;
             return item;
         }
 
@@ -210,15 +212,16 @@ internal static class ItemManager
 
     private static void CreateItem(BaseUnityPlugin baseUnity, ItemData itemData, ItemBehavior itemBehavior)
     {
-        NetworkObjectManager.SynchronizeItemId(baseUnity, itemData.GetType(), itemData.GetUiSprite, (id) =>
+        SynchronizeManager.SynchronizeItemId(baseUnity, itemData.GetType(), itemData.GetUiSprite, (id) =>
         {
             itemData.Id = id;
             itemBehavior.Id = id;
         });
         FishManager.RegisterNetworkObjectPrefab(BMAPlugin.Instance, itemBehavior, itemData.GetType().FullName);
         Mapping.Add((itemData, itemBehavior));
+        Mapping = [.. Mapping.OrderBy(map => map.data.Id)];
         registeredTypes.Add(itemData.GetType());
-        BlackMagicManager.UpdateSyncHash();
+        SynchronizeManager.UpdateSyncHash();
 
         BMAPlugin.Log.LogInfo($"Successfully registered {itemData.Name} Item from {baseUnity.Info.Metadata.GUID}");
     }

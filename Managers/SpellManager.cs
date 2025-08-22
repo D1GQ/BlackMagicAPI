@@ -135,7 +135,7 @@ internal static class SpellManager
                 prefab.hideFlags = HideFlags.HideAndDontSave;
                 UnityEngine.Object.DontDestroyOnLoad(prefab);
                 prefab.name = $"Page{spellData.Name.Replace(" ", "")}";
-                NetworkObjectManager.SynchronizeItemId(baseUnity, spellData.GetType(), spellData.GetUiSprite, (id) =>
+                SynchronizeManager.SynchronizeItemId(baseUnity, spellData.GetType(), spellData.GetUiSprite, (id) =>
                 {
                     spellData.Id = id;
                     prefab.ItemID = id;
@@ -144,8 +144,9 @@ internal static class SpellManager
                 spellData.SetUpPage(prefab.GetComponent<PageController>(), spellLogic);
                 spellData.SetLight(prefab.GetComponentInChildren<Light>(true));
                 Mapping.Add((spellData, prefab));
+                Mapping = [.. Mapping.OrderBy(map => map.data.Id)];
                 registeredTypes.Add(spellData.GetType());
-                BlackMagicManager.UpdateSyncHash();
+                SynchronizeManager.UpdateSyncHash();
             }
         }
 

@@ -12,7 +12,7 @@ namespace BlackMagicAPI.Patches.Voice;
 [HarmonyPatch(typeof(PlayerInventory))]
 internal class PlayerInventoryPatch
 {
-    private static readonly Dictionary<int, Sprite> UiSprites = [];
+    private static readonly Dictionary<int, Sprite?> UiSprites = [];
 
     [HarmonyPatch(nameof(PlayerInventory.SwapItemImg))]
     [HarmonyPrefix]

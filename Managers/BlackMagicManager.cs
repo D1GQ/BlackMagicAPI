@@ -2,7 +2,6 @@
 using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Patches.Managers;
 using FishNet.Managing;
-using System.Text;
 using UnityEngine;
 
 namespace BlackMagicAPI.Managers;
@@ -17,41 +16,6 @@ namespace BlackMagicAPI.Managers;
 /// </remarks>
 public class BlackMagicManager
 {
-    internal static void UpdateSyncHash()
-    {
-        var checksumBuilder = new StringBuilder();
-
-        foreach (var (data, _) in SpellManager.Mapping.OrderBy(map => map.data.Plugin?.GetUniqueHash()).ThenBy(map => map.data.GetType().FullName))
-        {
-            AppendMappingData(checksumBuilder,
-                data?.Plugin?.GetUniqueHash(),
-                data?.Id.ToString(),
-                data?.GetType().FullName);
-        }
-
-        foreach (var (data, _) in ItemManager.Mapping.OrderBy(map => map.data.Plugin?.GetUniqueHash()).ThenBy(map => map.data.GetType().FullName))
-        {
-            AppendMappingData(checksumBuilder,
-                data?.Plugin?.GetUniqueHash(),
-                data?.Id.ToString(),
-                data?.GetType().FullName);
-        }
-
-        var sb = checksumBuilder.ToString();
-        var hash = sb.Length > 0 ? Utils.Generate9DigitHash(sb) : "000 | 000 | 000";
-        MainMenuManagerPatch.UpdateHash($"(Black Magic Sync)\n{hash}");
-    }
-
-    private static void AppendMappingData(StringBuilder builder, params string?[] values)
-    {
-        builder.Append('[');
-        foreach (var value in values)
-        {
-            builder.Append(value ?? "");
-        }
-        builder.Append(']');
-    }
-
     /// <summary>
     /// Spawns a networked instance of an item of type T in the game world at an optional position and rotation.
     /// Requires an active NetworkManager and valid item prefab registration.
@@ -157,6 +121,17 @@ public class BlackMagicManager
     /// <exception cref="InvalidCastException">Thrown if item data cannot be created or cast to ItemData.</exception>
     public static void RegisterItem(BaseUnityPlugin plugin, Type ItemDataType, Type? ItemBehaviorType = null) =>
         ItemManager.RegisterItem(plugin, ItemDataType, ItemBehaviorType);
+
+    /// <summary>
+    /// Registers a new soup with the soup management system.
+    /// </summary>
+    /// <param name="plugin">The plugin registering the soup.</param>
+    /// <param name="IItemInteraction">The type of the item used to create the soup (must implement appropriate interface IItemInteraction).</param>
+    /// <param name="SoupDataType">The type of the soup data (must inherit from SoupData).</param>
+    /// <param name="SoupEffectType">The type of the soup effect (must inherit from SoupEffect, optional if SoupData can load a prefab).</param>
+    /// <exception cref="InvalidCastException">Thrown if soup data cannot be created or cast to SoupData.</exception>
+    public static void RegisterSoup(BaseUnityPlugin plugin, Type IItemInteraction, Type SoupDataType, Type? SoupEffectType = null) =>
+        SoupManager.RegisterSoup(plugin, IItemInteraction, SoupDataType, SoupEffectType);
 
     /// <summary>
     /// Retrieves the spell page prefab containing a spell of type T that implements ISpell.
