@@ -190,10 +190,7 @@ internal static class ItemManager
 
     private static ItemBehavior CreateItemBehavior(ItemData itemData, Type itemBehaviorType)
     {
-        var prefab = new GameObject($"{itemData.Name.Replace(" ", "")}Item")
-        {
-            hideFlags = HideFlags.HideAndDontSave
-        };
+        var prefab = new GameObject($"{itemData.Name.Replace(" ", "")}Item");
         UnityEngine.Object.DontDestroyOnLoad(prefab);
         prefab.AddComponent<AudioSource>();
         var render = new GameObject("ItemRender");

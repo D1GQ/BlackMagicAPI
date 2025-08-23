@@ -73,10 +73,7 @@ internal class SoupManager
 
     private static SoupEffect CreateSoupEffect(SoupData soupData, Type SoupEffectType)
     {
-        var prefab = new GameObject($"{soupData.Name.Replace(" ", "")}Effect")
-        {
-            hideFlags = HideFlags.HideAndDontSave
-        };
+        var prefab = new GameObject($"{soupData.Name.Replace(" ", "")}Effect");
         UnityEngine.Object.DontDestroyOnLoad(prefab);
         var effect = (SoupEffect)prefab.AddComponent(SoupEffectType);
         effect.OnPrefabCreatedAutomatically(effect.gameObject);
@@ -87,7 +84,6 @@ internal class SoupManager
     {
         var itemPrefab = Resources.FindObjectsOfTypeAll<CrystalSoup>().First();
         var prefab = UnityEngine.Object.Instantiate(itemPrefab);
-        prefab.hideFlags = HideFlags.HideAndDontSave;
         UnityEngine.Object.DontDestroyOnLoad(prefab);
         prefab.name = $"{soupData.Name.Replace(" ", "")}BowlItem";
         prefab.stewid = -1;
