@@ -15,7 +15,7 @@ public class BMAPlugin : BaseUnityPlugin
     internal static BMAPlugin Instance { get; private set; }
     private const string MyGUID = "com.d1gq.black.magic.api";
     internal const string PluginName = "BlackMagicAPI";
-    private const string VersionString = "2.6.2";
+    private const string VersionString = "2.6.3";
 
     private static Harmony? Harmony;
     internal static ManualLogSource Log => Instance._log;
@@ -23,6 +23,8 @@ public class BMAPlugin : BaseUnityPlugin
 
     /// <inheritdoc/>
     public static string modsync = "all";
+    /// <inheritdoc/>
+    public static string BlackMagicSyncHash { get; internal set; } = "";
 
     private void Awake()
     {

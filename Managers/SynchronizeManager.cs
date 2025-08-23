@@ -53,6 +53,7 @@ internal class SynchronizeManager
 
         var sb = checksumBuilder.ToString();
         var hash = sb.Length > 0 ? Utils.Generate9DigitHash(sb) : "000 | 000 | 000";
+        BMAPlugin.BlackMagicSyncHash = hash;
         MainMenuManagerPatch.UpdateHash($"(Black Magic Sync)\n{hash}");
     }
 
