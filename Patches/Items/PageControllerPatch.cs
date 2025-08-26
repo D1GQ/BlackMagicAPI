@@ -25,7 +25,7 @@ internal class PageControllerPatch
         if (IsCustomSpell(__instance))
         {
             var logicPrefab = __instance.spellprefab.GetComponent<SpellLogic>();
-            logicPrefab?.OnPageItemUse(player, __instance);
+            logicPrefab?.OnPageItemUse(player.GetComponent<PlayerMovement>(), __instance);
         }
     }
 
@@ -49,7 +49,7 @@ internal class PageControllerPatch
             pooledWriter.WriteVector3(spawnpos);
 
             var dataWriter = new DataWriter();
-            GetSpellPrefab(__instance).WriteData(dataWriter, __instance, ownerobj, spawnpos, fwdVector, level);
+            GetSpellPrefab(__instance).WriteData(dataWriter, __instance, ownerobj.GetComponent<PlayerMovement>(), spawnpos, fwdVector, level);
             dataWriter.WriteFromBuffer(pooledWriter);
             dataWriter.Dispose();
 
@@ -124,7 +124,13 @@ internal class PageControllerPatch
                 dataWriter.ReadToBuffer(PooledReader0);
                 spell.SyncData(dataWriter.GetObjectBuffer());
                 dataWriter.Dispose();
-                spell.CastSpell(ownerobj, __instance, spawnpos, fwdVector, level);
+
+                bool cooldown = spell.CastSpell(ownerobj.GetComponent<PlayerMovement>(), __instance, spawnpos, fwdVector, level);
+                if (!cooldown)
+                {
+                    __instance.ReinstatePageEmis();
+                    __instance.PageCoolDownTimer = Time.time - __instance.CoolDown;
+                }
             }
         }
     }

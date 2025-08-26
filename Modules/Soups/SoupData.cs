@@ -1,5 +1,7 @@
 ﻿using BepInEx;
 using BlackMagicAPI.Helpers;
+using BlackMagicAPI.Interfaces;
+using BlackMagicAPI.Managers;
 using BlackMagicAPI.Modules.Soups;
 using System.Reflection;
 using UnityEngine;
@@ -10,8 +12,11 @@ namespace BlackMagicAPI.Modules.Spells;
 /// Abstract base class representing soup data and configuration.
 /// Provides core functionality for soup identification, visual properties, and effect loading.
 /// </summary>
-public abstract class SoupData
+public abstract class SoupData : ICompatibility
 {
+    /// <inheritdoc/>
+    public Version CompatibilityVersion => CompatibilityManager.GetReferencedVersion(GetType());
+
     /// <summary>
     /// Gets the display name of the soup.
     /// </summary>

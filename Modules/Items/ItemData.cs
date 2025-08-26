@@ -1,5 +1,7 @@
 ﻿using BepInEx;
 using BlackMagicAPI.Helpers;
+using BlackMagicAPI.Interfaces;
+using BlackMagicAPI.Managers;
 using BlackMagicAPI.Modules.Items;
 using System.Reflection;
 using UnityEngine;
@@ -10,8 +12,11 @@ namespace BlackMagicAPI.Modules.Spells;
 /// Abstract base class representing item data and configuration.
 /// Provides core functionality for item identification, spawning rules, and asset loading.
 /// </summary>
-public abstract class ItemData
+public abstract class ItemData : ICompatibility
 {
+    /// <inheritdoc/>
+    public Version CompatibilityVersion => CompatibilityManager.GetReferencedVersion(GetType());
+
     /// <summary>
     /// Gets the display name of the item.
     /// </summary>

@@ -162,6 +162,19 @@ internal static class ItemManager
             return;
         }
 
+        switch (CompatibilityManager.CheckItemCompatibility(ItemDataType))
+        {
+            case CompatibilityResult.NoProperty:
+                BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: Unable to find Compatibility property in {ItemDataType.Name}, this can be due to {baseUnity.Info.Metadata.Name} being outdated!");
+                return;
+            case CompatibilityResult.OldVersion:
+                BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: {ItemDataType.Name} Is incompatible with BlackMagicAPI v{BMAPlugin.VersionString}!");
+                return;
+            case CompatibilityResult.Error:
+                BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: An error occurred when trying to get Compatibility Version from {ItemDataType.Name}!");
+                return;
+        }
+
         _ = RegisterItemTask(baseUnity, ItemDataType, ItemBehaviorType);
     }
 

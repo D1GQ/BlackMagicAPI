@@ -15,7 +15,7 @@ public class BMAPlugin : BaseUnityPlugin
     internal static BMAPlugin Instance { get; private set; }
     private const string MyGUID = "com.d1gq.black.magic.api";
     internal const string PluginName = "BlackMagicAPI";
-    private const string VersionString = "2.6.3";
+    internal const string VersionString = "3.0.0";
 
     private static Harmony? Harmony;
     internal static ManualLogSource Log => Instance._log;
@@ -32,7 +32,7 @@ public class BMAPlugin : BaseUnityPlugin
         Instance = this;
         Harmony = new(MyGUID);
         Harmony.PatchAll();
-        Log.LogInfo($"BlackMagicAPI v{VersionString} loaded!");
+        Log.LogInfo($"BlackMagicAPI v{VersionString} loaded, (Compatibility -> v{CompatibilityManager.COMPATIBILITY_VERSION})");
         SynchronizeManager.UpdateSyncHash();
     }
 }

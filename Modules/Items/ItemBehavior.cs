@@ -1,4 +1,5 @@
 ﻿using BlackMagicAPI.Network;
+using FishNet.Connection;
 using FishNet.Managing;
 using FishNet.Object;
 using FishNet.Object.Delegating;
@@ -134,9 +135,7 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
     /// Virtual method for handling item-specific usage logic.
     /// </summary>
     /// <param name="itemOwner">The player using the item</param>
-#pragma warning disable CS0618 // Type or member is obsolete
-    protected virtual void OnItemUse(PlayerMovement itemOwner) { OnItemUse(itemOwner.gameObject); }
-#pragma warning restore CS0618 // Type or member is obsolete
+    protected abstract void OnItemUse(PlayerMovement itemOwner);
 
     /// <summary>
     /// Virtual method for handling item-specific Equipped logic.
@@ -252,7 +251,49 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
     private void NetworkInitialize()
     {
         if (netInit) return; netInit = true;
-        RegisterObserversRpc(0, new ClientRpcDelegate(HandleSyncClientRpc));
+        RegisterServerRpc(0, new ServerRpcDelegate(HandleSyncClientCmd));
+        RegisterObserversRpc(1, new ClientRpcDelegate(HandleSyncClientRpc));
+    }
+
+    /// <summary>
+    /// Sends a command from client to server using the CMD RPC channel.
+    /// </summary>
+    /// <param name="cmdId">Command identifier</param>
+    /// <param name="args">Command arguments</param>
+    protected void SendClientCmd(uint cmdId, params object[] args)
+    {
+        if (!IsClientInitialized)
+        {
+            NetworkManager networkManager = NetworkManager;
+            networkManager.LogWarning("Cannot complete action because client is not active. This may also occur if the object is not yet initialized, has deinitialized, or if it does not contain a NetworkObject component.");
+            return;
+        }
+
+        PooledWriter writer = WriterPool.Retrieve();
+        writer.Write(cmdId);
+        var dataWriter = new DataWriter();
+        foreach (var arg in args)
+            dataWriter.Write(arg);
+        dataWriter.WriteFromBuffer(writer);
+        dataWriter.Dispose();
+        SendServerRpc(0, writer, Channel.Reliable, DataOrderType.Default);
+        writer.Store();
+    }
+
+    /// <summary>
+    /// Handles received command data from clients that used SendClientCmd.
+    /// </summary>
+    /// <param name="cmdId">Command identifier</param>
+    /// <param name="args">Received command arguments</param>
+    protected virtual void HandleSyncClient(uint cmdId, object[] args) { }
+
+    private void HandleSyncClientCmd(PooledReader reader, Channel channel, NetworkConnection sender)
+    {
+        var cmdId = reader.Read<uint>();
+        var dataWriter = new DataWriter();
+        dataWriter.ReadToBuffer(reader);
+        HandleSyncClient(cmdId, dataWriter.GetObjectBuffer());
+        dataWriter.Dispose();
     }
 
     /// <summary>
@@ -276,7 +317,7 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
             dataWriter.Write(arg);
         dataWriter.WriteFromBuffer(writer);
         dataWriter.Dispose();
-        SendObserversRpc(0, writer, Channel.Reliable, DataOrderType.Default, false, false, false);
+        SendObserversRpc(1, writer, Channel.Reliable, DataOrderType.Default, false, false, false);
         writer.Store();
     }
 
@@ -295,14 +336,4 @@ public abstract class ItemBehavior : NetworkBehaviour, IInteractable, IItemInter
         HandleItemSync(syncId, dataWriter.GetObjectBuffer());
         dataWriter.Dispose();
     }
-
-    /// <summary>
-    /// (Deprecated) Virtual method for handling item-specific usage logic.
-    /// </summary>
-    /// <param name="itemOwner">The player GameObject using the item</param>
-    /// <remarks>
-    /// This method is obsolete. Override OnItemUse(PlayerMovement) instead.
-    /// </remarks>
-    [Obsolete("This method is deprecated. Please override OnItemUse(PlayerMovement) instead.")]
-    protected virtual void OnItemUse(GameObject itemOwner) { }
 }

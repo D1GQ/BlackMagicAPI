@@ -1,6 +1,8 @@
 ﻿using BepInEx;
 using BlackMagicAPI.Enums;
 using BlackMagicAPI.Helpers;
+using BlackMagicAPI.Interfaces;
+using BlackMagicAPI.Managers;
 using System.Reflection;
 using UnityEngine;
 
@@ -14,8 +16,11 @@ namespace BlackMagicAPI.Modules.Spells;
 /// Derived classes must implement key spell properties and can override resource loading methods
 /// to provide custom assets. The class handles automatic setup of spell materials and lighting.
 /// </remarks>
-public abstract class SpellData
+public abstract class SpellData : ICompatibility
 {
+    /// <inheritdoc/>
+    public Version CompatibilityVersion => CompatibilityManager.GetReferencedVersion(GetType());
+
     /// <summary>
     /// Gets the classification type of the spell.
     /// </summary>

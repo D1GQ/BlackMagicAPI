@@ -81,12 +81,16 @@ public abstract class SpellLogic : MonoBehaviour, ISpell
     /// <summary>
     /// Contains the core spell casting logic to be implemented by derived classes.
     /// </summary>
-    /// <param name="playerObj">The GameObject of the player casting the spell.</param>
+    /// <param name="caster">The player casting the spell.</param>
     /// <param name="page">The PageController containing spell information.</param>
     /// <param name="spawnPos">The position where the spell should be spawned.</param>
     /// <param name="viewDirectionVector">The direction vector of the player's view.</param>
     /// <param name="castingLevel">The power level of the spell cast.</param>
-    public abstract void CastSpell(GameObject playerObj, PageController page, Vector3 spawnPos, Vector3 viewDirectionVector, int castingLevel);
+    /// <returns>
+    /// <c>true</c> if the spell was successfully cast and the page should go on cooldown; 
+    /// <c>false</c> if the spell failed or the page should not go on cooldown.
+    /// </returns>
+    public abstract bool CastSpell(PlayerMovement caster, PageController page, Vector3 spawnPos, Vector3 viewDirectionVector, int castingLevel);
 
     /// <summary>
     /// Virtual method for handling item-specific usage logic for spell page.
@@ -96,7 +100,7 @@ public abstract class SpellLogic : MonoBehaviour, ISpell
     /// <remarks>
     /// Note that this code executes within the SpellLogic prefab, so avoid modifying anything within the prefab itself!
     /// </remarks>
-    public virtual void OnPageItemUse(GameObject itemOwner, PageController page) { }
+    public virtual void OnPageItemUse(PlayerMovement itemOwner, PageController page) { }
 
     /// <summary>
     /// Called automatically when a spell prefab is created programmatically.
@@ -111,11 +115,11 @@ public abstract class SpellLogic : MonoBehaviour, ISpell
     /// </summary>
     /// <param name="dataWriter">The writer used to serialize data.</param>
     /// <param name="page">The page controller associated with the data.</param>
-    /// <param name="playerObj">The player GameObject to serialize.</param>
+    /// <param name="caster">The player GameObject to serialize.</param>
     /// <param name="spawnPos">The spawn position of the player.</param>
     /// <param name="viewDirectionVector">The view direction of the player.</param>
     /// <param name="level">The current level or stage.</param>
-    public virtual void WriteData(DataWriter dataWriter, PageController page, GameObject playerObj, Vector3 spawnPos, Vector3 viewDirectionVector, int level) { }
+    public virtual void WriteData(DataWriter dataWriter, PageController page, PlayerMovement caster, Vector3 spawnPos, Vector3 viewDirectionVector, int level) { }
 
     /// <summary>
     /// Clients including Castor Synchronizes of values from WriteData received from Castor.
