@@ -53,12 +53,14 @@ internal static class SpellManager
         if (SpellDataType.IsAbstract)
         {
             BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: SpellDataType can not be abstract!");
+            ModSyncManager.FailedSpells.Add((baseUnity, SpellDataType));
             return;
         }
 
         if (!SpellDataType.IsSubclassOf(typeof(SpellData)))
         {
             BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: SpellDataType must be inherited from SpellData!");
+            ModSyncManager.FailedSpells.Add((baseUnity, SpellDataType));
             return;
         }
 
@@ -67,12 +69,14 @@ internal static class SpellManager
             if (SpellLogicType.IsAbstract)
             {
                 BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: SpellLogicType can not be abstract!");
+                ModSyncManager.FailedSpells.Add((baseUnity, SpellDataType));
                 return;
             }
 
             if (!SpellLogicType.IsSubclassOf(typeof(SpellLogic)))
             {
                 BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: SpellDataType must be inherited from SpellLogic!");
+                ModSyncManager.FailedSpells.Add((baseUnity, SpellDataType));
                 return;
             }
         }
@@ -80,6 +84,7 @@ internal static class SpellManager
         if (registeredTypes.Contains(SpellDataType))
         {
             BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: {SpellDataType.Name} has already been registered!");
+            ModSyncManager.FailedSpells.Add((baseUnity, SpellDataType));
             return;
         }
 
@@ -87,12 +92,15 @@ internal static class SpellManager
         {
             case CompatibilityResult.NoProperty:
                 BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: Unable to find Compatibility property in {SpellDataType.Name}, this can be due to {baseUnity.Info.Metadata.Name} being outdated!");
+                ModSyncManager.FailedSpells.Add((baseUnity, SpellDataType));
                 return;
             case CompatibilityResult.OldVersion:
                 BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: {SpellDataType.Name} Is incompatible with BlackMagicAPI v{BMAPlugin.VersionString}!");
+                ModSyncManager.FailedSpells.Add((baseUnity, SpellDataType));
                 return;
             case CompatibilityResult.Error:
                 BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: An error occurred when trying to get Compatibility Version from {SpellDataType.Name}!");
+                ModSyncManager.FailedSpells.Add((baseUnity, SpellDataType));
                 return;
         }
 
@@ -103,6 +111,7 @@ internal static class SpellManager
     {
         if (Activator.CreateInstance(spellDataType) is not SpellData data)
         {
+            ModSyncManager.FailedSpells.Add((baseUnity, spellDataType));
             throw new InvalidCastException($"Failed to create or cast {spellDataType} to SpellData");
         }
 
@@ -112,6 +121,7 @@ internal static class SpellManager
         {
             if (spellLogicType == null)
             {
+                ModSyncManager.FailedSpells.Add((baseUnity, spellDataType));
                 BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: spellLogicType cannot be null without a loadable prefab!");
                 return;
             }

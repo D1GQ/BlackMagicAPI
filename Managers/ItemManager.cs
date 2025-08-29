@@ -18,36 +18,42 @@ internal static class ItemManager
         if (IItemInteraction_FirstType.IsInterface)
         {
             BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_FirstType can not be directly IItemInteraction interface!");
+            ModSyncManager.FailedRecipes.Add((baseUnity, IItemInteraction_FirstType, IItemInteraction_SecondType, IItemInteraction_ResultType));
             return;
         }
 
         if (IItemInteraction_SecondType.IsInterface)
         {
             BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_SecondType can not be directly IItemInteraction interface!");
+            ModSyncManager.FailedRecipes.Add((baseUnity, IItemInteraction_FirstType, IItemInteraction_SecondType, IItemInteraction_ResultType));
             return;
         }
 
         if (IItemInteraction_ResultType.IsInterface)
         {
             BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_ResultType can not be directly IItemInteraction interface!");
+            ModSyncManager.FailedRecipes.Add((baseUnity, IItemInteraction_FirstType, IItemInteraction_SecondType, IItemInteraction_ResultType));
             return;
         }
 
         if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_FirstType) && !typeof(ISpell).IsAssignableFrom(IItemInteraction_FirstType))
         {
             BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_FirstType must be inherited from IItemInteraction interface!");
+            ModSyncManager.FailedRecipes.Add((baseUnity, IItemInteraction_FirstType, IItemInteraction_SecondType, IItemInteraction_ResultType));
             return;
         }
 
         if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_SecondType) && !typeof(ISpell).IsAssignableFrom(IItemInteraction_SecondType))
         {
             BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_SecondType must be inherited from IItemInteraction interface!");
+            ModSyncManager.FailedRecipes.Add((baseUnity, IItemInteraction_FirstType, IItemInteraction_SecondType, IItemInteraction_ResultType));
             return;
         }
 
         if (!typeof(IItemInteraction).IsAssignableFrom(IItemInteraction_ResultType) && !typeof(ISpell).IsAssignableFrom(IItemInteraction_SecondType))
         {
             BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: IItemInteraction_ResultType must be inherited from IItemInteraction interface!");
+            ModSyncManager.FailedRecipes.Add((baseUnity, IItemInteraction_FirstType, IItemInteraction_SecondType, IItemInteraction_ResultType));
             return;
         }
 
@@ -70,21 +76,25 @@ internal static class ItemManager
                     else
                     {
                         BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: You cannot register a recipe that's already been registered!");
+                        ModSyncManager.FailedRecipes.Add((baseUnity, IItemInteraction_FirstType, IItemInteraction_SecondType, IItemInteraction_ResultType));
                     }
                 }
                 else
                 {
                     BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: Unable to find item prefab for {IItemInteraction_ResultType.Name}!");
+                    ModSyncManager.FailedRecipes.Add((baseUnity, IItemInteraction_FirstType, IItemInteraction_SecondType, IItemInteraction_ResultType));
                 }
             }
             else
             {
                 BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: Unable to find item prefab for {IItemInteraction_SecondType.Name}!");
+                ModSyncManager.FailedRecipes.Add((baseUnity, IItemInteraction_FirstType, IItemInteraction_SecondType, IItemInteraction_ResultType));
             }
         }
         else
         {
             BMAPlugin.Log.LogError($"Failed to register item recipe from {baseUnity.Info.Metadata.Name}: Unable to find item prefab for {IItemInteraction_FirstType.Name}!");
+            ModSyncManager.FailedRecipes.Add((baseUnity, IItemInteraction_FirstType, IItemInteraction_SecondType, IItemInteraction_ResultType));
         }
     }
 
@@ -132,12 +142,14 @@ internal static class ItemManager
         if (ItemDataType.IsAbstract)
         {
             BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: ItemDataType can not be abstract!");
+            ModSyncManager.FailedItems.Add((baseUnity, ItemDataType));
             return;
         }
 
         if (!ItemDataType.IsSubclassOf(typeof(ItemData)))
         {
             BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: ItemDataType must be inherited from SpellData!");
+            ModSyncManager.FailedItems.Add((baseUnity, ItemDataType));
             return;
         }
 
@@ -146,12 +158,14 @@ internal static class ItemManager
             if (ItemBehaviorType.IsAbstract)
             {
                 BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: ItemBehaviorType can not be abstract!");
+                ModSyncManager.FailedItems.Add((baseUnity, ItemDataType));
                 return;
             }
 
             if (!ItemBehaviorType.IsSubclassOf(typeof(ItemBehavior)))
             {
                 BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: ItemBehaviorType must be inherited from SpellLogic!");
+                ModSyncManager.FailedItems.Add((baseUnity, ItemDataType));
                 return;
             }
         }
@@ -159,6 +173,7 @@ internal static class ItemManager
         if (registeredTypes.Contains(ItemDataType))
         {
             BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: {ItemDataType.Name} has already been registered!");
+            ModSyncManager.FailedItems.Add((baseUnity, ItemDataType));
             return;
         }
 
@@ -166,23 +181,27 @@ internal static class ItemManager
         {
             case CompatibilityResult.NoProperty:
                 BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: Unable to find Compatibility property in {ItemDataType.Name}, this can be due to {baseUnity.Info.Metadata.Name} being outdated!");
+                ModSyncManager.FailedItems.Add((baseUnity, ItemDataType));
                 return;
             case CompatibilityResult.OldVersion:
                 BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: {ItemDataType.Name} Is incompatible with BlackMagicAPI v{BMAPlugin.VersionString}!");
+                ModSyncManager.FailedItems.Add((baseUnity, ItemDataType));
                 return;
             case CompatibilityResult.Error:
                 BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: An error occurred when trying to get Compatibility Version from {ItemDataType.Name}!");
+                ModSyncManager.FailedItems.Add((baseUnity, ItemDataType));
                 return;
         }
 
         _ = RegisterItemTask(baseUnity, ItemDataType, ItemBehaviorType);
     }
 
-    private static async Task RegisterItemTask(BaseUnityPlugin baseUnity, Type spellItemType, Type? itemBehaviorType)
+    private static async Task RegisterItemTask(BaseUnityPlugin baseUnity, Type itemDataType, Type? itemBehaviorType)
     {
-        if (Activator.CreateInstance(spellItemType) is not ItemData data)
+        if (Activator.CreateInstance(itemDataType) is not ItemData data)
         {
-            throw new InvalidCastException($"Failed to create or cast {spellItemType} to SpellData");
+            ModSyncManager.FailedItems.Add((baseUnity, itemDataType));
+            throw new InvalidCastException($"Failed to create or cast {itemDataType} to SpellData");
         }
 
         data.Plugin = baseUnity;
@@ -192,6 +211,7 @@ internal static class ItemManager
             if (itemBehaviorType == null)
             {
                 BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: spellLogicType cannot be null without a loadable prefab!");
+                ModSyncManager.FailedItems.Add((baseUnity, itemDataType));
                 return;
             }
 

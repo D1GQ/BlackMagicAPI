@@ -19,12 +19,14 @@ internal class SoupManager
         if (IItemInteraction.IsInterface)
         {
             BMAPlugin.Log.LogError($"Failed to register soup from {baseUnity.Info.Metadata.Name}: IItemInteraction can not be directly IItemInteraction interface!");
+            ModSyncManager.FailedSoups.Add((baseUnity, soupDataType));
             return;
         }
 
         if (!soupDataType.IsSubclassOf(typeof(SoupData)))
         {
             BMAPlugin.Log.LogError($"Failed to register soup from {baseUnity.Info.Metadata.Name}: soupDataType must be inherited from SoupData!");
+            ModSyncManager.FailedSoups.Add((baseUnity, soupDataType));
             return;
         }
 
@@ -33,6 +35,7 @@ internal class SoupManager
             if (!soupEffectType.IsSubclassOf(typeof(SoupEffect)))
             {
                 BMAPlugin.Log.LogError($"Failed to register soup from {baseUnity.Info.Metadata.Name}: soupEffectType must be inherited from SoupEffect!");
+                ModSyncManager.FailedSoups.Add((baseUnity, soupDataType));
                 return;
             }
         }
@@ -40,6 +43,7 @@ internal class SoupManager
         if (registeredTypes.Contains(soupDataType))
         {
             BMAPlugin.Log.LogError($"Failed to register soup from {baseUnity.Info.Metadata.Name}: {soupDataType.Name} has already been registered!");
+            ModSyncManager.FailedSoups.Add((baseUnity, soupDataType));
             return;
         }
 
@@ -50,6 +54,7 @@ internal class SoupManager
     {
         if (Activator.CreateInstance(soupDataType) is not SoupData data)
         {
+            ModSyncManager.FailedSoups.Add((baseUnity, soupDataType));
             throw new InvalidCastException($"Failed to create or cast {soupDataType} to SoupData");
         }
 
@@ -61,6 +66,7 @@ internal class SoupManager
             if (soupEffectType == null)
             {
                 BMAPlugin.Log.LogError($"Failed to register soup from {baseUnity.Info.Metadata.Name}: soupEffectType cannot be null without a loadable prefab!");
+                ModSyncManager.FailedSoups.Add((baseUnity, soupDataType));
                 return;
             }
 
