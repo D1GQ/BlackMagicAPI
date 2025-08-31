@@ -7,7 +7,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlackMagicAPI.Patches.Voice;
+namespace BlackMagicAPI.Patches.Player;
 
 [HarmonyPatch(typeof(PlayerInventory))]
 internal class PlayerInventoryPatch

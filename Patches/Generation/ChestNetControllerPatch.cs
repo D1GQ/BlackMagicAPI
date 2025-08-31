@@ -3,7 +3,7 @@ using BlackMagicAPI.Managers;
 using HarmonyLib;
 using System.Reflection;
 
-namespace BlackMagicAPI.Patches.Items;
+namespace BlackMagicAPI.Patches.Generation;
 
 [HarmonyPatch(typeof(ChestNetController))]
 internal class ChestNetControllerPatch

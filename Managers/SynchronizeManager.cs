@@ -1,7 +1,7 @@
 ﻿using BepInEx;
 using BlackMagicAPI.Helpers;
 using BlackMagicAPI.Patches.Managers;
-using BlackMagicAPI.Patches.Voice;
+using BlackMagicAPI.Patches.Player;
 using System.Text;
 using UnityEngine;
 

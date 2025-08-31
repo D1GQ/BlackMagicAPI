@@ -4,7 +4,7 @@ using HarmonyLib;
 using System.Reflection;
 using UnityEngine;
 
-namespace BlackMagicAPI.Patches.Voice;
+namespace BlackMagicAPI.Patches.Player;
 
 [HarmonyPatch(typeof(PlayerMovement))]
 internal class PlayerMovementPatch

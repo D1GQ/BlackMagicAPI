@@ -138,18 +138,7 @@ internal class PageControllerPatch
     [HarmonyPatch]
     private static class RpcReader___Observers_CastSpellObsPatch
     {
-        private static MethodBase TargetMethod()
-        {
-            var methods = typeof(PageController)
-                .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                .Where(m => m.Name.StartsWith("RpcReader___Observers_CastSpellObs"))
-                .ToList();
-
-            if (methods.Count == 0)
-                throw new Exception("Could not find RpcReader___Observers_CastSpellObs method");
-
-            return methods[0];
-        }
+        private static MethodBase TargetMethod() => Utils.PatchRpcMethod<PageController>("RpcReader___Observers_CastSpellObs");
 
         [HarmonyPrefix]
         private static bool Prefix(PageController __instance, PooledReader PooledReader0, Channel channel)
