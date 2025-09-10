@@ -16,6 +16,7 @@ internal class PlayerInventoryPatch
 
     [HarmonyPatch(nameof(PlayerInventory.SwapItemImg))]
     [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
     private static bool SwapItemImg_Prefix(PlayerInventory __instance, int slotid, int itemid)
     {
         if (itemid > __instance.ItemIcons.Length)
@@ -38,6 +39,7 @@ internal class PlayerInventoryPatch
 
     [HarmonyPatch(typeof(PlayerInventory), nameof(PlayerInventory.PlayerDied))]
     [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
     private static bool PlayerDied_Prefix(PlayerInventory __instance)
     {
         __instance.canUseItem = false;
@@ -115,6 +117,7 @@ internal class PlayerInventoryPatch
         private static MethodBase TargetMethod() => Utils.PatchRpcMethod<PlayerInventory>("RpcLogic___PlaceOnCraftingTableObserver");
 
         [HarmonyPostfix]
+        [HarmonyPriority(Priority.First)]
         private static void Postfix(GameObject obj, GameObject CrIn)
         {
             if (obj.TryGetComponent<ItemBehavior>(out var itemBehavior))

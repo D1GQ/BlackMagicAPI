@@ -10,23 +10,29 @@ internal class ChestNetControllerPatch
 {
     [HarmonyPatch(nameof(ChestNetController.Awake))]
     [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
     private static void Awake_Prefix(ChestNetController __instance)
     {
         var list = __instance.Items.ToList();
+
+
         foreach (var map in ItemManager.Mapping.OrderBy(m => m.data.Id))
         {
             if (!map.data.CanSpawnInTeamChest) continue;
             list.Add(map.behavior.gameObject);
         }
+
         foreach (var map in SpellManager.Mapping.OrderBy(m => m.data.Id))
         {
             if (!map.data.CanSpawnInTeamChest) continue;
             list.Add(map.page.gameObject);
         }
+
         __instance.Items = [.. list];
     }
 
     [HarmonyPatch]
+    [HarmonyPriority(Priority.First)]
     private static class PiseverPatch
     {
         private static MethodBase TargetMethod() => Utils.PatchRpcMethod<ChestNetController>("RpcLogic___pisever");

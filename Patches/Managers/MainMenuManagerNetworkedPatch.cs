@@ -10,6 +10,7 @@ internal class MainMenuManagerNetworkedPatch
 {
     [HarmonyPatch(nameof(MainMenuManagerNetworked.Start))]
     [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
     private static void Start_Prefix(MainMenuManagerNetworked __instance)
     {
         foreach (var spellData in SpellManager.Mapping.Select(value => value.data))

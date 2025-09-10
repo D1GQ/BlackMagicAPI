@@ -15,6 +15,7 @@ internal class SoupManPatch
 
         [HarmonyPatch(nameof(SoupManController.Start))]
         [HarmonyPostfix]
+        [HarmonyPriority(Priority.First)]
         private static void Start_Postfix(SoupManController __instance)
         {
             if (!usedIds.TryGetValue(__instance, out var controllerUsedIds))
@@ -73,6 +74,7 @@ internal class SoupManPatch
     {
         [HarmonyPatch(nameof(SoupManInteractor.DisplayInteractUI))]
         [HarmonyPrefix]
+        [HarmonyPriority(Priority.First)]
         private static bool DisplayInteractUI_Prefix(SoupManInteractor __instance, GameObject player, ref string __result)
         {
             if (player.TryGetComponent<PlayerInventory>(out var playerInventory) && !__instance.smc.isCookingSoup)
@@ -91,6 +93,7 @@ internal class SoupManPatch
 
         [HarmonyPatch(nameof(SoupManInteractor.Interact))]
         [HarmonyPrefix]
+        [HarmonyPriority(Priority.First)]
         private static bool Interact_Prefix(SoupManInteractor __instance, GameObject player)
         {
             if (Time.time - __instance.cd < 1f) return true;
@@ -116,6 +119,7 @@ internal class SoupManPatch
     {
         [HarmonyPatch(nameof(GetSoupFromGuy.DisplayInteractUI))]
         [HarmonyPrefix]
+        [HarmonyPriority(Priority.First)]
         private static bool DisplayInteractUI_Prefix(GetSoupFromGuy __instance, GameObject player, ref string __result)
         {
             var map = SoupManager.Mapping.FirstOrDefault(map => map.data.SoupId == __instance.soupid);

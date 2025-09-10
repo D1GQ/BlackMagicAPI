@@ -20,6 +20,7 @@ internal class PageControllerPatch
 
     [HarmonyPatch(nameof(PageController.Interaction))]
     [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
     private static void Interaction_Prefix(PageController __instance, GameObject player)
     {
         if (IsCustomSpell(__instance))
@@ -31,6 +32,7 @@ internal class PageControllerPatch
 
     [HarmonyPatch(nameof(PageController.CastSpellServer))]
     [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
     private static bool CastSpellServer_Prefix(PageController __instance, GameObject ownerobj, Vector3 fwdVector, int level, Vector3 spawnpos)
     {
         if (IsCustomSpell(__instance))
@@ -68,6 +70,7 @@ internal class PageControllerPatch
         private static MethodBase TargetMethod() => Utils.PatchRpcMethod<PageController>("RpcReader___Server_CastSpellServer");
 
         [HarmonyPrefix]
+        [HarmonyPriority(Priority.First)]
         private static bool Prefix(PageController __instance, PooledReader PooledReader0, Channel channel, NetworkConnection conn)
         {
             if (IsCustomSpell(__instance))
@@ -141,6 +144,7 @@ internal class PageControllerPatch
         private static MethodBase TargetMethod() => Utils.PatchRpcMethod<PageController>("RpcReader___Observers_CastSpellObs");
 
         [HarmonyPrefix]
+        [HarmonyPriority(Priority.First)]
         private static bool Prefix(PageController __instance, PooledReader PooledReader0, Channel channel)
         {
             if (IsCustomSpell(__instance))

@@ -15,7 +15,7 @@ internal class CraftingForgePatch
     {
         var item1 = firstItemPrefap.GetComponent<IItemInteraction>();
         var item2 = secondItemPrefap.GetComponent<IItemInteraction>();
-        var resultItem = resultPrefap.GetComponent<IItemInteraction>();
+        // var resultItem = resultPrefap.GetComponent<IItemInteraction>();
 
         if (!TryGetRecipeByIDs(item1.GetItemID(), item2.GetItemID(), out _))
         {
@@ -43,6 +43,7 @@ internal class CraftingForgePatch
 
     [HarmonyPatch(nameof(CraftingForge.OnStartClient))]
     [HarmonyPostfix]
+    [HarmonyPriority(Priority.First)]
     private static void OnStartClient_Postfix(CraftingForge __instance)
     {
         __instance.StartCoroutine(CoCustomCrafter(__instance));
@@ -80,6 +81,7 @@ internal class CraftingForgePatch
         private static MethodBase TargetMethod() => Utils.PatchRpcMethod<CraftingForge>("RpcLogic___ServerCraft");
 
         [HarmonyPrefix]
+        [HarmonyPriority(Priority.First)]
         private static bool Prefix(CraftingForge __instance)
         {
             if (__instance.SlotItems[0] == null || __instance.SlotItems[1] == null) return true;

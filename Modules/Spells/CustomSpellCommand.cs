@@ -1,6 +1,7 @@
 ﻿using Recognissimo;
 using Recognissimo.Components;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 namespace BlackMagicAPI.Modules.Spells;
@@ -8,6 +9,7 @@ namespace BlackMagicAPI.Modules.Spells;
 internal class CustomSpellCommand : MonoBehaviour, ISpellCommand
 {
     internal string SpellName { get; set; } = "[]";
+    [AllowNull]
     internal SpellData SpellData { get; set; }
     private PlayerInventory? playerInventory { get; set; }
     private SpeechRecognizer? speechRecognizer { get; set; }

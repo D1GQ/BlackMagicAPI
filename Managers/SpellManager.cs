@@ -95,7 +95,7 @@ internal static class SpellManager
                 ModSyncManager.FailedSpells.Add((baseUnity, SpellDataType));
                 return;
             case CompatibilityResult.OldVersion:
-                BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: {SpellDataType.Name} Is incompatible with BlackMagicAPI v{BMAPlugin.VersionString}!");
+                BMAPlugin.Log.LogError($"Failed to register spell from {baseUnity.Info.Metadata.Name}: {SpellDataType.Name} Is incompatible with BlackMagicAPI v{ModMetaData.VERSION}!");
                 ModSyncManager.FailedSpells.Add((baseUnity, SpellDataType));
                 return;
             case CompatibilityResult.Error:

@@ -9,6 +9,7 @@ internal class Generator2DPatch
 {
     [HarmonyPatch(nameof(Generator2D.PlaceItemIn))]
     [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
     private static void PlaceItemIn_Prefix(Generator2D __instance, ref int itemid)
     {
         itemid = __instance.plt.Pages[itemid].GetComponent<PageController>()?.ItemID ?? __instance.plt.Pages[itemid].GetComponent<PipeItem>()?.GetItemID() ?? 0;
@@ -20,6 +21,7 @@ internal class Generator2DPatch
         private static MethodBase TargetMethod() => Utils.PatchRpcMethod<Generator2D>("RpcLogic___ServerPlaceItem");
 
         [HarmonyPrefix]
+        [HarmonyPriority(Priority.First)]
         private static void Prefix(Generator2D __instance, ref int itemid)
         {
             for (int i = 0; i < __instance.plt.Pages.Length; i++)

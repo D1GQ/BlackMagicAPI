@@ -11,6 +11,7 @@ internal class PlayerRespawnManagerPatch
 
     [HarmonyPatch(nameof(PlayerRespawnManager.OnStartClient))]
     [HarmonyPostfix]
+    [HarmonyPriority(Priority.First)]
     private static void OnStartClient_Postfix(PlayerRespawnManager __instance)
     {
         foreach (var data in DeathIcons)

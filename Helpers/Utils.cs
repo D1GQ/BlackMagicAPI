@@ -80,6 +80,7 @@ public static class Utils
     /// Loads a sprite from a given path, optionally specifying pixels per unit.
     /// Caches the sprite for future use.
     /// </summary>
+    /// <param name="assembly">The assembly to load from.</param>
     /// <param name="path">The file path of the texture to create the sprite from.</param>
     /// <param name="pixelsPerUnit">The number of pixels per unit for the sprite.</param>
     /// <returns>A Sprite object if successful, or null if it fails to load the sprite.</returns>
@@ -109,6 +110,7 @@ public static class Utils
     /// <summary>
     /// Loads a texture from embedded resources in the application's assembly.
     /// </summary>
+    /// <param name="assembly">The assembly to load from.</param>
     /// <param name="path">The path to the texture resource.</param>
     /// <returns>A Texture2D object if the texture was loaded successfully, or null if it failed.</returns>
     public static Texture2D? LoadTextureFromResources(this Assembly assembly, string path)
@@ -348,7 +350,7 @@ public static class Utils
         return methods[0];
     }
 
-    internal static GameObject? FindInactive(string path, string sceneName = null)
+    internal static GameObject? FindInactive(string path, string? sceneName = null)
     {
         if (string.IsNullOrEmpty(path))
         {

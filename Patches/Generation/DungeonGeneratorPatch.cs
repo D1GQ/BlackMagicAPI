@@ -8,9 +8,11 @@ internal class DungeonGeneratorPatch
 {
     [HarmonyPatch(nameof(DungeonGenerator.Start))]
     [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
     private static void Start_Prefix(DungeonGenerator __instance)
     {
         var lt = __instance.GetComponent<PageLootTable>();
+
         if (lt != null)
         {
             var list = lt.Pages.ToList();
@@ -18,6 +20,7 @@ internal class DungeonGeneratorPatch
             {
                 list.Add(page.gameObject);
             }
+
             lt.Pages = [.. list];
         }
     }

@@ -15,6 +15,7 @@ internal class PlayerMovementPatch
         private static MethodBase TargetMethod() => Utils.PatchRpcMethod<PlayerMovement>("RpcLogic___ObsDrinkSoup");
 
         [HarmonyPrefix]
+        [HarmonyPriority(Priority.First)]
         private static bool Prefix(PlayerMovement __instance, int stewid)
         {
             var map = SoupManager.Mapping.FirstOrDefault(map => map.data.SoupId == stewid);

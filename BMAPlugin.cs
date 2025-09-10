@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using BlackMagicAPI.Managers;
 using HarmonyLib;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -11,18 +12,20 @@ namespace BlackMagicAPI;
 
 /// <inheritdoc/>
 [BepInProcess("MageArena")]
-[BepInDependency("com.magearena.modsync", BepInDependency.DependencyFlags.HardDependency)]
-[BepInDependency("com.d1gq.fish.utilities", BepInDependency.DependencyFlags.HardDependency)]
-[BepInPlugin(MyGUID, PluginName, VersionString)]
+[BepInDependency(ModMetaData.MOD_SYNC_GUID_DEP, BepInDependency.DependencyFlags.HardDependency)]
+[BepInDependency(ModMetaData.FISH_UTILITIES_GUID_DEP, BepInDependency.DependencyFlags.HardDependency)]
+[BepInPlugin(ModMetaData.GUID, ModMetaData.PLUGIN_NAME, ModMetaData.VERSION)]
 public class BMAPlugin : BaseUnityPlugin
 {
+    [AllowNull]
     internal static BMAPlugin Instance { get; private set; }
-    private const string MyGUID = "com.d1gq.black.magic.api";
-    internal const string PluginName = "BlackMagicAPI";
-    internal const string VersionString = "3.0.1";
 
     private static Harmony? Harmony;
+
+#pragma warning disable CS8603 // Possible null reference return.
     internal static ManualLogSource Log => Instance._log;
+#pragma warning restore CS8603 // Possible null reference return.
+
     private ManualLogSource? _log;
 
     /// <inheritdoc/>
@@ -34,9 +37,9 @@ public class BMAPlugin : BaseUnityPlugin
     {
         _log = Logger;
         Instance = this;
-        Harmony = new(MyGUID);
+        Harmony = new(ModMetaData.GUID);
         Harmony.PatchAll();
-        Log.LogInfo($"BlackMagicAPI v{VersionString} loaded, (Compatibility -> v{CompatibilityManager.COMPATIBILITY_VERSION})");
+        Log.LogInfo($"BlackMagicAPI v{ModMetaData.VERSION} loaded, (Compatibility -> v{CompatibilityManager.COMPATIBILITY_VERSION})");
         SynchronizeManager.UpdateSyncHash();
         StartCoroutine(CoWaitForChainloaderToLog());
     }

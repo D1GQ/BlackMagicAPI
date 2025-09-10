@@ -184,7 +184,7 @@ internal static class ItemManager
                 ModSyncManager.FailedItems.Add((baseUnity, ItemDataType));
                 return;
             case CompatibilityResult.OldVersion:
-                BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: {ItemDataType.Name} Is incompatible with BlackMagicAPI v{BMAPlugin.VersionString}!");
+                BMAPlugin.Log.LogError($"Failed to register item from {baseUnity.Info.Metadata.Name}: {ItemDataType.Name} Is incompatible with BlackMagicAPI v{ModMetaData.VERSION}!");
                 ModSyncManager.FailedItems.Add((baseUnity, ItemDataType));
                 return;
             case CompatibilityResult.Error:

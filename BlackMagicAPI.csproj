@@ -23,6 +23,9 @@
 		<Reference Include="Assembly-CSharp" Publicize="true">
 			<HintPath>References\Assembly-CSharp.dll</HintPath>
 		</Reference>
+		<Reference Include="BepInEx" Publicize="true">
+			<HintPath>References\BepInEx.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -31,4 +34,9 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="copy &quot;$(TargetDir)BlackMagicAPI.dll&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Mage Arena\Modded\BepInEx\plugins\BlackMagicAPI&quot;" />
+		<Exec Command="copy &quot;$(TargetDir)BlackMagicAPI.xml&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Mage Arena\Modded\BepInEx\plugins\BlackMagicAPI&quot;" />
+	</Target>
 </Project>

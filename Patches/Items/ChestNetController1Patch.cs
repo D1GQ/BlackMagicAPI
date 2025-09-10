@@ -9,6 +9,7 @@ internal class ChestNetController1Patch
 {
     [HarmonyPatch(nameof(ChestNetController1.PlaceItemIn))]
     [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
     private static void PlaceItemIn_Prefix(ChestNetController1 __instance, ref int itemid)
     {
         itemid = __instance.plt.Pages[itemid].GetComponent<PageController>()?.ItemID ?? __instance.plt.Pages[itemid].GetComponent<PipeItem>()?.GetItemID() ?? 0;
@@ -20,6 +21,7 @@ internal class ChestNetController1Patch
         private static MethodBase TargetMethod() => Utils.PatchRpcMethod<ChestNetController1>("RpcLogic___ServerPlaceItem");
 
         [HarmonyPrefix]
+        [HarmonyPriority(Priority.First)]
         private static void Prefix(ChestNetController1 __instance, ref int itemid)
         {
             for (int i = 0; i < __instance.plt.Pages.Length; i++)

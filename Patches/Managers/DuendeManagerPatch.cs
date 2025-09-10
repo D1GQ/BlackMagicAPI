@@ -10,6 +10,7 @@ internal class DuendeManagerPatch
 {
     [HarmonyPatch(nameof(DuendeManager.Awake))]
     [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
     private static void Awake_Prefix(DuendeManager __instance)
     {
         var list = __instance.DuendeTradeItems.ToList();
@@ -23,6 +24,7 @@ internal class DuendeManagerPatch
 
     [HarmonyPatch(nameof(DuendeManager.ServerCreatePage))]
     [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
     private static void ServerCreatePage_Prefix(DuendeManager __instance, ref int rand)
     {
         rand = __instance.plt.Pages[rand].GetComponent<PageController>()?.ItemID ?? __instance.plt.Pages[rand].GetComponent<PipeItem>()?.GetItemID() ?? 0;
@@ -34,6 +36,7 @@ internal class DuendeManagerPatch
         private static MethodBase TargetMethod() => Utils.PatchRpcMethod<DuendeManager>("RpcLogic___ServerCreatePage");
 
         [HarmonyPrefix]
+        [HarmonyPriority(Priority.First)]
         private static void Prefix(DuendeManager __instance, [HarmonyArgument(1)] ref int rand)
         {
             for (int i = 0; i < __instance.plt.Pages.Length; i++)
